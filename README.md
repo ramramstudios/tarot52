@@ -40,9 +40,11 @@ See the [Lore page](lore.html) for the full table.
 
 ## How the app works today
 
-1. The 52-card deck is shuffled (Fisher-Yates, crypto RNG) and laid out in a 4 × 13 grid.
-2. A dropdown in the top-right lets you choose how many cards to draw — values are Fibonacci numbers ≤ 51: `1, 2, 3, 5, 8, 13, 21, 34`.
-3. Click cards to flip them, up to your chosen draw limit. The reading panel below the spread lists each flipped card with its suit, name, and term.
+The app boots in **chat-first** mode: the chat takes the full viewport, and the spread is hidden behind a collapse toggle (☰) in the chat header. The assistant greets you, declares the active reading mode, and tells you when to open the spread.
+
+- The 52-card deck is shuffled (Fisher-Yates, crypto RNG) and laid out in a 4 × 13 grid in the spread sidebar.
+- The reading mode is **locked once a session starts**. To change modes or start over, use the **"New"** button in the chat header: it opens a confirmation modal with a mode dropdown and a Start button. Starting wipes the chat thread, reshuffles the deck, and applies the new mode.
+- Inside the spread, clicking cards flips them up to the active mode's card limit. The reading panel below the spread lists each flipped card with its suit, name, and term, and each flip is mirrored as a meta message in the chat.
 
 ## Planned UX: LLM-assisted divination
 
@@ -83,26 +85,59 @@ Then open `http://localhost:8000`.
 
 Card descriptions in `lore.json` are condensed from Arthur Edward Waite, *The Pictorial Key to the Tarot* (William Rider & Son, 1910), now in the public domain. Sourced via [rider-waite.com](https://rider-waite.com/symbolism/).
 
-## Notes
+## Workflow
 
-Will need a system prompt that handles any question and knows how to filter it through the meaning of the cards to have the question influcenced in a way worth reading. Should probably make the prompt be submitted BEFORE the card draw. Also, maybe the different card fibonnacci selection (1, 2, 3, 5, 8...) indicates a certain type of system prompt, e.g. '3' gives a past/present/future style reading; or a '32' gives a very in depth detailed meaning with the order of the cards drawn affects different aspects of the response.
+The current implementation is a single-thread, mode-scoped reading flow. The chat is primary; the spread is secondary and stays hidden until cards are needed. Mode (and therefore the system prompt) is fixed for the duration of a thread — starting a new thread is the only way to change it.
 
-The flow has to be where the chatbot welcomes the user with "Welcome to Tarot Chat", I see you have selected a {3} card draw, this is a past present and future draw, so the guidance you seek will be filtered through what the tarot has to tell you the form of the past, present, and future timeline as it pertains to the inquiry you submit, and insight the tarot gives.
+### Reading modes
 
-The {x} number of cards will need to be defined for the diferent scenarios. The idea is similar to that of the celtic cross or other more complex readings where each card and its placement (selection order) define the aspect of the insight given. At the moment I only have self-defined the 1 and 3-card draw; 1 is a simple overarching context lens through which the querant's querites get guided through.
+Three modes are defined in `app.js`. Each carries its own system prompt and a list of positional roles for its cards:
 
-Workflow order will be:
-1) chatbot give a standard first greeting, like: "welcome to tarot 52", please select a mode (fibonacci number)
-2) user selects {x} which loads a particular system prompt
-3) chatbot says, "ah! you've chosen {y} mode (e.g. past, present, future). Meditate on your inquiry before typing, then submit."
-3) chatbot says, "Now select {x} cards."
-4) User flips over {x} card(s); the order is important and will correspond to the system prompt, or example on a 3-card draw the order maps to the meaning of the card. 1st card drawn is past, 2nd is present, 3rd is future.
-5) the selected card(s) are flipped immediately as the user clicks them. As each is flipped the display container which already exists now, is populated with each card and meaning as is currently implemented. Once the last card is flipped, this triggers the chatbot to respond with the initial response give then context of the system promp+the user's initial query (use prompt)+the context of the chosen cards as the lens filter corresponding to the query and mode we're in.
+| Cards | Label                    | Positions (in draw order)             |
+|-------|--------------------------|---------------------------------------|
+| 1     | General Insight          | Lens                                  |
+| 2     | Crossroads               | Path A, Path B                        |
+| 3     | Past / Present / Future  | Past, Present, Future                 |
 
-Example:
-User enters prompt: "tell me about my love life"
-User flips the 3rd card, [let's say they got Ace of Spades, 3 of Spades, and 4 of Spades]
-Once the 4 of Spades is flipped the response is sent to the LLM with the payload which includes system prompt ["this reponse should be in the form of past(card 1), present(card 2), future(card 3)"; view the entire query through the lens of these three cards to generate the meaning of the cards as they would be associated to the lifetime of someone and how the three time periods would cast insight with the variable cards inserted into their functionality]
-so the payload includes the system prompt (mode), user prompt (user's inquiry), and the cards selected (which defines the reponse content); the response should be fairly generic but build as the user provides more information which will inform the thread context and get more specific with its insight.
+More modes (5, 8, …) can be added to `READING_MODES` in `app.js`. The Fibonacci-only draw counts (1, 2, 3, 5, 8, 13, 21, 34) are a soft convention rather than a hard rule.
 
-So we need to build system prompts system prompts, and we'll start with the drop down choices (modes) for 1, 2, 3; 1 is general insight, 2, is crossroads (like an A vs B binary option choice the user can make), and 3 is past/present/future as discussed.
+### Session flow
+
+1. **Boot.** The page loads in chat-fullscreen. The assistant says "Welcome to Tarot Chat" and announces the active mode ("I see you have selected 1-card General Insight mode…"). It lists the position roles for that mode and tells the user to open the spread (☰) when ready.
+2. **Inquiry.** The user types their question in the chat. The chat acknowledges and re-prompts the user to open the spread and pick the right number of cards.
+3. **Draw.** The user clicks the ☰ in the chat header to show the spread, then flips cards one at a time. Each flip emits a meta message into the chat (`Past: 3 of Hearts - Collaboration`). The spread enforces the mode's card limit.
+4. **Reading.** When the last required card flips, the chat sends a payload (system prompt + inquiry + cards with positions, terms, and full RWS descriptions from `lore.json`) to the LLM and renders the response. Currently this is a mock; the hook lives at the `TODO` in `chat.js` inside `answerCompletedReading`.
+5. **Follow-up.** The user can keep chatting in the same thread. Follow-up messages are appended to `state.followUps` and would be sent to the LLM with the same system prompt and card payload, plus the running thread, for increasingly specific readings.
+6. **New thread.** Clicking the **"New"** button in the chat header opens a confirmation modal with a mode dropdown. Selecting a mode and clicking "Start" clears the chat, reshuffles the deck into the new mode, and returns the user to chat-fullscreen. There is no way to change mode mid-thread.
+
+### Example payload (3-card reading)
+
+User inquiry: *"Tell me about my love life."*
+
+Cards drawn in order: `Ace of Spades`, `3 of Spades`, `4 of Spades`.
+
+Payload sent to the LLM:
+
+```json
+{
+  "systemPrompt": "You are Tarot 52, a reflective tarot-reading assistant. The querent selected a Past / Present / Future reading. Interpret card one as Past, card two as Present, and card three as Future…",
+  "mode": {
+    "count": 3,
+    "label": "Past / Present / Future",
+    "positions": [
+      { "name": "Past",    "prompt": "Read this card as the background pattern…" },
+      { "name": "Present", "prompt": "Read this card as the current pressure…" },
+      { "name": "Future",  "prompt": "Read this card as the direction the pattern could grow toward…" }
+    ]
+  },
+  "userPrompt": "Tell me about my love life.",
+  "cards": [
+    { "name": "Ace of Spades", "term": "Lucidity",  "positionName": "Past",    "tarot": "Ace of Swords", "description": "..." },
+    { "name": "3 of Spades",   "term": "Heartbreak","positionName": "Present", "tarot": "Three of Swords", "description": "..." },
+    { "name": "4 of Spades",   "term": "Rest",      "positionName": "Future",  "tarot": "Four of Swords", "description": "..." }
+  ],
+  "followUps": []
+}
+```
+
+The payload structure is stable; only the model call needs to be filled in.

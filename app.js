@@ -288,39 +288,36 @@ function initTarotSpread(spreadEl, readingEl, mode) {
 function bootSidebarSpread(rootEl) {
   const spreadEl   = rootEl.querySelector('#tarotSpread');
   const readingEl  = rootEl.querySelector('#tarotReading');
-  const drawCount  = rootEl.querySelector('#drawCount');
-  const newBtn     = rootEl.querySelector('#newReadingBtn');
+  const modeLabel  = rootEl.querySelector('#currentModeLabel');
 
-  if (!spreadEl || !readingEl || !drawCount || !newBtn) {
+  if (!spreadEl || !readingEl) {
     console.warn('[sidebar-spread] missing expected elements in root');
     return;
   }
 
   let spreadSession = null;
+  let currentMode = getReadingMode(1); // default
 
-  // Populate available reading-mode options if not already present.
-  if (drawCount.options.length === 0) {
-    Object.values(READING_MODES).forEach((mode) => {
-      const opt = document.createElement('option');
-      opt.value = String(mode.count);
-      opt.textContent = `${mode.count} - ${mode.label}`;
-      drawCount.appendChild(opt);
-    });
-  }
-
-  const start = (reason = 'reset') => {
-    const mode = getReadingMode(parseInt(drawCount.value, 10));
-    spreadSession = initTarotSpread(spreadEl, readingEl, mode);
-    dispatchTarotEvent('modechange', { mode, reason });
+  const start = (mode, reason = 'reset') => {
+    currentMode = mode || getReadingMode(1);
+    spreadSession = initTarotSpread(spreadEl, readingEl, currentMode);
+    if (modeLabel) {
+      modeLabel.textContent = `${currentMode.count} - ${currentMode.label}`;
+    }
+    dispatchTarotEvent('modechange', { mode: currentMode, reason });
   };
 
   window.addEventListener('tarot52:inquiryready', () => {
     if (spreadSession) spreadSession.setInquiryReady(true);
   });
 
-  start('initial');
-  drawCount.addEventListener('change', () => start('modechange'));
-  newBtn.addEventListener('click', () => start('newspread'));
+  // External request to begin a new session (from the chat "New" modal).
+  window.addEventListener('tarot52:newsession', (e) => {
+    const mode = getReadingMode(parseInt(e.detail.count, 10));
+    start(mode, 'newspread');
+  });
+
+  start(currentMode, 'initial');
 }
 
 // Expose for the index.html bootstrap to call after injection.

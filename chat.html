@@ -20,6 +20,14 @@
       <h2 class="chat-title">Tarot Chat</h2>
       <p class="chat-subtitle">Ask first. Draw second. Read in context.</p>
     </div>
+    <button
+      type="button"
+      class="chat-new-btn"
+      id="chatNewBtn"
+      aria-haspopup="dialog"
+      aria-controls="newChatModal"
+      title="Start a new chat"
+    >New</button>
   </header>
 
   <div class="chat-thread" id="chatThread" role="log" aria-live="polite" aria-label="Chat messages">
@@ -42,4 +50,33 @@
       <span aria-hidden="true">↑</span>
     </button>
   </form>
+
+  <div
+    class="modal-backdrop"
+    id="newChatModalBackdrop"
+    hidden
+    role="presentation"
+  >
+    <div
+      class="modal"
+      id="newChatModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="newChatModalTitle"
+      aria-describedby="newChatModalDesc"
+    >
+      <h3 class="modal-title" id="newChatModalTitle">Start a new chat?</h3>
+      <p class="modal-desc" id="newChatModalDesc">
+        This will clear the current thread and shuffle a new deck.
+      </p>
+      <label class="modal-field">
+        <span class="modal-field-label">Reading mode</span>
+        <select id="newChatModeSelect" aria-label="Reading mode"></select>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="newChatCancelBtn">Cancel</button>
+        <button type="button" class="btn-primary" id="newChatStartBtn">Start</button>
+      </div>
+    </div>
+  </div>
 </section>

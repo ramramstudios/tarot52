@@ -182,14 +182,6 @@ body.resizing * {
 .chat-header-text {
   flex: 1;
   text-align: center;
-  /* Keep the title visually centered even with the toggle on the left.
-     The toggle's reserved space is mirrored by a transparent pseudo-element. */
-  padding-right: var(--chat-toggle-width, 0);
-}
-.chat-header::after {
-  content: '';
-  width: var(--chat-toggle-width, 0);
-  flex-shrink: 0;
 }
 
 /* Collapse toggle — hide/show the spread sidebar */
@@ -251,10 +243,131 @@ body.resizing * {
   top: 10px;
 }
 
-/* Reserve space for the toggle so the title stays centered */
-.chat-root:has(.chat-collapse-toggle) {
-  --chat-toggle-width: 36px;
+/* "New chat" button at the right end of the chat header */
+.chat-new-btn {
+  flex-shrink: 0;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease), background var(--ease);
 }
+.chat-new-btn:hover {
+  color: var(--purple);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+.chat-new-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Active mode label shown in the spread toolbar */
+.page-toolbar-mode {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-right: auto; /* push the rest of the toolbar to the right */
+  padding-left: 0.25rem;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.modal-backdrop.is-open { opacity: 1; }
+.modal-backdrop[hidden] { display: none; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.5rem 1.25rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-md);
+  transform: translateY(8px);
+  transition: transform 0.18s ease;
+}
+.modal-backdrop.is-open .modal { transform: translateY(0); }
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--text);
+}
+.modal-desc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.1rem;
+}
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+.modal-field-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.modal-field select {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.modal-field select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--purple);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+/* Generic secondary button (used in the modal) */
+.btn-secondary {
+  display: inline-block;
+  padding: 9px 18px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease), background var(--ease);
+}
+.btn-secondary:hover  { color: var(--purple); border-color: rgba(139, 92, 246, 0.5); }
+.btn-secondary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
 .chat-title {
   font-size: 1.4rem;
   font-weight: 700;

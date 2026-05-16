@@ -30,8 +30,6 @@ function getFallbackMode() {
   };
 }
 
-const COLLAPSE_LS_KEY = 'tarot52.chatFullscreen';
-
 function syncPaneToggleButtons(collapsed) {
   document.querySelectorAll('[data-pane-toggle]').forEach((toggleBtn) => {
     toggleBtn.setAttribute('aria-pressed', String(collapsed));
@@ -58,15 +56,14 @@ function bootChat(rootEl) {
     return;
   }
 
-  // Restore + wire the collapse toggle.
-  const saved = localStorage.getItem(COLLAPSE_LS_KEY) === '1';
-  applyCollapsedState(saved);
+  // Always start collapsed (chat-fullscreen). The user opens the spread on demand
+  // when the assistant prompts them to pick cards.
+  applyCollapsedState(true);
   document.querySelectorAll('[data-pane-toggle]').forEach((toggleBtn) => {
     toggleBtn.addEventListener('click', () => {
       const layout = document.getElementById('layout');
       const next = !(layout && layout.classList.contains('chat-fullscreen'));
       applyCollapsedState(next);
-      localStorage.setItem(COLLAPSE_LS_KEY, next ? '1' : '0');
     });
   });
 
@@ -122,7 +119,7 @@ function bootChat(rootEl) {
     const positions = mode.positions.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
     appendMessage(
       'assistant',
-      `${prefix} ${mode.count}-card ${mode.label} mode.\n\n${mode.intro}\n\n${positions}\n\nMeditate on your inquiry, type it below, then draw ${mode.count === 1 ? 'your card' : `${mode.count} cards`}.`
+      `${prefix} ${mode.count}-card ${mode.label} mode.\n\n${mode.intro}\n\n${positions}\n\nMeditate on your inquiry, type it below, then open the spread (the ☰ icon, top-left) and draw ${mode.count === 1 ? 'your card' : `${mode.count} cards`}.`
     );
   };
 
@@ -230,7 +227,7 @@ function bootChat(rootEl) {
       }));
       appendMessage(
         'assistant',
-        `Now select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`} from the spread. I will read them in draw order for ${state.mode.label}.`
+        `Now open the spread (☰ top-left) and select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`}. I will read them in draw order for ${state.mode.label}.`
       );
       return;
     }
@@ -251,6 +248,90 @@ function bootChat(rootEl) {
       submit();
     }
   });
+
+  // ---- "New chat" modal ------------------------------------------------
+  const newBtn       = rootEl.querySelector('#chatNewBtn');
+  const modalBackdrop = rootEl.querySelector('#newChatModalBackdrop');
+  const modalSelect   = rootEl.querySelector('#newChatModeSelect');
+  const modalCancel   = rootEl.querySelector('#newChatCancelBtn');
+  const modalStart    = rootEl.querySelector('#newChatStartBtn');
+
+  const populateModeOptions = () => {
+    if (!modalSelect) return;
+    const modes = window.Tarot52ReadingModes || {};
+    modalSelect.innerHTML = '';
+    Object.values(modes).forEach((mode) => {
+      const opt = document.createElement('option');
+      opt.value = String(mode.count);
+      opt.textContent = `${mode.count} - ${mode.label}`;
+      modalSelect.appendChild(opt);
+    });
+  };
+  populateModeOptions();
+
+  let lastFocusedBeforeModal = null;
+  const openModal = () => {
+    if (!modalBackdrop) return;
+    populateModeOptions(); // refresh in case modes are added at runtime
+    // Default the dropdown to the currently active mode.
+    if (modalSelect && state.mode) {
+      modalSelect.value = String(state.mode.count);
+    }
+    lastFocusedBeforeModal = document.activeElement;
+    modalBackdrop.hidden = false;
+    requestAnimationFrame(() => {
+      modalBackdrop.classList.add('is-open');
+      if (modalSelect) modalSelect.focus();
+    });
+  };
+  const closeModal = () => {
+    if (!modalBackdrop) return;
+    modalBackdrop.classList.remove('is-open');
+    modalBackdrop.hidden = true;
+    if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === 'function') {
+      lastFocusedBeforeModal.focus();
+    }
+  };
+
+  const resetChatThread = () => {
+    thread.innerHTML = '';
+    const empty = document.createElement('div');
+    empty.className = 'chat-empty';
+    empty.innerHTML = '<p>This is where your reading will appear.</p><p class="chat-empty-hint">Type a question below to begin.</p>';
+    thread.appendChild(empty);
+    state.inquiry = '';
+    state.cards = [];
+    state.readingComplete = false;
+    state.followUps = [];
+    input.value = '';
+    autoGrow();
+  };
+
+  if (newBtn) newBtn.addEventListener('click', openModal);
+  if (modalCancel) modalCancel.addEventListener('click', closeModal);
+  if (modalBackdrop) {
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalBackdrop && !modalBackdrop.hidden) closeModal();
+  });
+  if (modalStart) {
+    modalStart.addEventListener('click', () => {
+      const count = parseInt(modalSelect?.value || '1', 10);
+      closeModal();
+      resetChatThread();
+      // Always collapse chat back to fullscreen so the user starts focused on the chat.
+      applyCollapsedState(true);
+      // Tell the spread to reshuffle into the new mode. It will fire a
+      // modechange event back, which our existing listener turns into the
+      // greeting + describeMode message.
+      window.dispatchEvent(new CustomEvent('tarot52:newsession', {
+        detail: { count, reason: 'newspread' },
+      }));
+    });
+  }
 
   window.addEventListener('tarot52:modechange', (e) => {
     resetForMode(e.detail.mode, e.detail.reason);
