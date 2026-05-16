@@ -3,24 +3,16 @@
   Standalone-renderable so it can be opened directly during scaffolding.
 -->
 <section class="page page-tarot sidebar-spread-root">
-  <div class="page-toolbar">
-    <a class="nav-link" href="lore.html">Lore →</a>
+  <nav class="page-toolbar" aria-label="Spread controls">
+    <a class="nav-link" href="lore.html">Lore</a>
     <label class="draw-count">
       <span class="draw-count-label">Mode</span>
       <select id="drawCount" aria-label="Reading mode"></select>
     </label>
-  </div>
-
-  <header class="page-header">
-    <h1>Tarot 52</h1>
-    <p class="page-subtitle">Choose a card — let the deck decide.</p>
-  </header>
+    <button class="btn-primary btn-compact" id="newReadingBtn">New <span class="btn-label-extra">Spread</span></button>
+  </nav>
 
   <div class="tarot-spread" id="tarotSpread"></div>
 
   <div class="tarot-reading" id="tarotReading"></div>
-
-  <div class="tarot-controls">
-    <button class="btn-primary" id="newReadingBtn">New Spread</button>
-  </div>
 </section>
