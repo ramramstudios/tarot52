@@ -85,39 +85,51 @@ function buildCard3D(rankIdx, suitIdx) {
   return wrapper;
 }
 
-/** Wire the 5-card spread interaction */
-function initTarotSpread(spreadEl, readingEl) {
-  const deck = shuffleDeck();
-  const hand = deck.slice(0, 5);
-  const ROTATE = [-6, -3, 0, 3, 6];
+/** Wire the full 52-card spread interaction, allowing up to `limit` flips */
+function initTarotSpread(spreadEl, readingEl, limit) {
+  const hand = shuffleDeck();
+  const flipped = [];
 
   spreadEl.innerHTML = '';
 
-  hand.forEach(({ r, s }, i) => {
+  const renderReading = () => {
+    if (flipped.length === 0) {
+      const noun = limit === 1 ? 'a card' : `${limit} cards`;
+      readingEl.innerHTML = `<p class="reading-prompt">Choose ${noun} from the spread above.</p>`;
+      return;
+    }
+    const rows = flipped.map(({ r, s }) => {
+      const suit = SUITS[s];
+      return `
+        <div class="reading-row ${suit.cls}">
+          <span class="reading-suit-icon">${suit.symbol}</span>
+          <span class="reading-card-name">${RANKS[r]} of ${suit.name}</span>
+          <span class="reading-meaning">${MEANINGS[r][s]}</span>
+        </div>
+      `;
+    }).join('');
+    const heading = flipped.length < limit
+      ? `<p class="reading-prompt">${flipped.length} of ${limit} drawn.</p>`
+      : '';
+    readingEl.innerHTML = heading + `<div class="reading-list">${rows}</div>`;
+  };
+
+  hand.forEach(({ r, s }) => {
     const card = buildCard3D(r, s);
-    card.style.transform = `rotate(${ROTATE[i]}deg)`;
-    card.style.setProperty('--rot', `${ROTATE[i]}deg`);
 
     const flip = () => {
       if (card.classList.contains('flipped')) return;
-      const isAnyFlipped = spreadEl.querySelector('.flipped');
-      if (isAnyFlipped) return;
+      if (flipped.length >= limit) return;
 
       card.classList.add('flipped', 'selected');
-      card.style.transform = 'translateY(-8px) scale(1.08)';
       card.setAttribute('aria-label', `${RANKS[r]} of ${SUITS[s].name}`);
+      flipped.push({ r, s });
 
-      spreadEl.querySelectorAll('.card-3d').forEach(c => {
-        if (c !== card) c.classList.add('dimmed');
-      });
+      if (flipped.length >= limit) {
+        spreadEl.querySelectorAll('.card-3d:not(.flipped)').forEach(c => c.classList.add('dimmed'));
+      }
 
-      const suit = SUITS[s];
-      const meaning = MEANINGS[r][s];
-      readingEl.innerHTML = `
-        <div class="reading-suit-icon">${suit.symbol}</div>
-        <div class="reading-card-name">${RANKS[r]} of ${suit.name}</div>
-        <div class="reading-meaning">${meaning}</div>
-      `;
+      renderReading();
     };
 
     card.addEventListener('click', flip);
@@ -125,7 +137,19 @@ function initTarotSpread(spreadEl, readingEl) {
     spreadEl.appendChild(card);
   });
 
-  readingEl.innerHTML = `<p class="reading-prompt">Choose a card from the spread above.</p>`;
+  renderReading();
+}
+
+/** Fibonacci numbers in [1, 51] */
+function fibUpTo(max) {
+  const out = [];
+  let a = 1, b = 2;
+  out.push(a);
+  while (b <= max) {
+    out.push(b);
+    [a, b] = [b, a + b];
+  }
+  return out;
 }
 
 /* -----------------------------------------------
@@ -134,7 +158,18 @@ function initTarotSpread(spreadEl, readingEl) {
 function renderTarot() {
   const el = document.createElement('section');
   el.className = 'page page-tarot';
+
+  const fibs = fibUpTo(51);
+  const options = fibs.map(n => `<option value="${n}">${n}</option>`).join('');
+
   el.innerHTML = `
+    <div class="page-toolbar">
+      <label class="draw-count">
+        <span class="draw-count-label">Draw</span>
+        <select id="drawCount" aria-label="Number of cards to draw">${options}</select>
+      </label>
+    </div>
+
     <header class="page-header">
       <h1>Tarot 52</h1>
       <p class="page-subtitle">Choose a card — let the deck decide.</p>
@@ -142,25 +177,23 @@ function renderTarot() {
 
     <div class="tarot-spread" id="tarotSpread"></div>
 
-    <div class="tarot-reading" id="tarotReading">
-      <p class="reading-prompt">Choose a card from the spread above.</p>
-    </div>
+    <div class="tarot-reading" id="tarotReading"></div>
 
     <div class="tarot-controls">
       <button class="btn-primary" id="newReadingBtn">New Spread</button>
     </div>
-
-    <img class="tarot-image" src="tarot52.png" alt="Tarot 52" loading="lazy" />
   `;
 
-  const spreadEl  = el.querySelector('#tarotSpread');
-  const readingEl = el.querySelector('#tarotReading');
+  const spreadEl   = el.querySelector('#tarotSpread');
+  const readingEl  = el.querySelector('#tarotReading');
+  const drawCount  = el.querySelector('#drawCount');
 
-  initTarotSpread(spreadEl, readingEl);
+  const start = () => initTarotSpread(spreadEl, readingEl, parseInt(drawCount.value, 10));
 
-  el.querySelector('#newReadingBtn').addEventListener('click', () => {
-    initTarotSpread(spreadEl, readingEl);
-  });
+  start();
+
+  drawCount.addEventListener('change', start);
+  el.querySelector('#newReadingBtn').addEventListener('click', start);
 
   return el;
 }

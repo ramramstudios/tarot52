@@ -47,7 +47,7 @@ button { cursor: pointer; font-family: inherit; }
 #app { min-height: 100vh; }
 
 .page {
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2.5rem 1.25rem 5rem;
 }
@@ -74,14 +74,13 @@ button { cursor: pointer; font-family: inherit; }
    TAROT 52
    ============================================================ */
 
-/* Spread container — cosmic feel */
+/* Spread container — 4x13 grid of full deck */
 .tarot-spread {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 0.6rem;
+  justify-items: center;
   padding: 2rem 1.5rem 2.5rem;
-  flex-wrap: wrap;
   background: radial-gradient(ellipse at 50% 80%, #1a0a38 0%, #0c0810 55%, transparent 100%);
   border-radius: var(--radius);
   border: 1px solid rgba(139, 92, 246, 0.12);
@@ -91,10 +90,10 @@ button { cursor: pointer; font-family: inherit; }
 /* 3-D card shell */
 .card-3d {
   perspective: 900px;
-  width: 95px;
-  height: 133px; /* 5:7 poker ratio (2.5" x 3.5") */
+  width: 100%;
+  max-width: 85px;
+  aspect-ratio: 5 / 7; /* 5:7 poker ratio (2.5" x 3.5") */
   cursor: pointer;
-  flex-shrink: 0;
   transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-inner {
@@ -204,9 +203,31 @@ button { cursor: pointer; font-family: inherit; }
   transition: background 0.4s ease;
 }
 .reading-prompt     { color: var(--text-dim); font-size: 0.88rem; font-style: italic; }
-.reading-suit-icon  { font-size: 2rem; line-height: 1; }
-.reading-card-name  { font-size: 1.5rem; font-weight: 700; color: #e2d9f3; letter-spacing: -0.01em; }
-.reading-meaning    { font-size: 1rem; font-weight: 500; color: var(--purple); margin-top: 0.15rem; }
+.reading-suit-icon  { font-size: 1.5rem; line-height: 1; }
+.reading-card-name  { font-size: 1.05rem; font-weight: 700; color: #e2d9f3; letter-spacing: -0.01em; }
+.reading-meaning    { font-size: 0.95rem; font-weight: 500; color: var(--purple); }
+
+.reading-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.reading-row {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.85rem;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+.reading-row.suit-red   .reading-suit-icon { color: #f87171; }
+.reading-row.suit-black .reading-suit-icon { color: #e2d9f3; }
 
 .tarot-controls {
   display: flex;
@@ -214,14 +235,32 @@ button { cursor: pointer; font-family: inherit; }
   margin-bottom: 2.5rem;
 }
 
-.tarot-image {
-  width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  opacity: 0.85;
+/* Toolbar in upper-right with the draw-count dropdown */
+.page-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
 }
+.draw-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.draw-count select {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+.draw-count select:hover { border-color: rgba(139, 92, 246, 0.5); }
+.draw-count select:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 /* ============================================================
    BUTTONS
@@ -247,13 +286,18 @@ button { cursor: pointer; font-family: inherit; }
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+@media (max-width: 900px) {
+  .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.5rem; padding: 1.25rem 0.75rem 1.75rem; }
+}
 @media (max-width: 640px) {
-  .card-3d { width: 70px; height: 98px; } /* 5:7 poker ratio */
-  .card-ornament    { font-size: 1.5rem; }
-  .card-center-suit { font-size: 1.4rem; }
-  .rank-label { font-size: 0.58rem; }
-  .suit-label { font-size: 0.54rem; }
-  .tarot-spread { gap: 0.45rem; padding: 1.25rem 0.75rem 1.75rem; }
+  .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.35rem; padding: 0.75rem 0.5rem 1rem; }
+  .card-ornament    { font-size: 1.2rem; }
+  .card-center-suit { font-size: 1.2rem; }
+  .rank-label { font-size: 0.5rem; }
+  .suit-label { font-size: 0.5rem; }
+}
+@media (max-width: 420px) {
+  .tarot-spread { grid-template-columns: repeat(6, 1fr); }
 }
 
 /* ============================================================
