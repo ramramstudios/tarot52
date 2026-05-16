@@ -103,13 +103,13 @@ async function init() {
   // Boot each component now that markup is in the DOM.
   const spreadRoot = sidebarSlot.querySelector('.sidebar-spread-root');
   const chatRoot   = chatSlot.querySelector('.chat-root');
-  if (spreadRoot && window.bootSidebarSpread) {
-    spreadRoot.dataset.booted = '1';
-    window.bootSidebarSpread(spreadRoot);
-  }
   if (chatRoot && window.bootChat) {
     chatRoot.dataset.booted = '1';
     window.bootChat(chatRoot);
+  }
+  if (spreadRoot && window.bootSidebarSpread) {
+    spreadRoot.dataset.booted = '1';
+    window.bootSidebarSpread(spreadRoot);
   }
 
   initResize(layoutEl, handleEl);

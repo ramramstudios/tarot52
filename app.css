@@ -195,6 +195,14 @@ body.resizing * {
   border: 1px solid var(--border);
   border-bottom-left-radius: 4px;
 }
+.chat-msg-meta .chat-bubble {
+  max-width: 88%;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  font-size: 0.84rem;
+  padding: 0.45rem 0.7rem;
+}
 
 .chat-composer {
   display: flex;
@@ -313,6 +321,16 @@ body.resizing * {
 .card-3d:not(.flipped):not(.dimmed):hover {
   filter: drop-shadow(0 0 14px rgba(139, 92, 246, 0.45));
 }
+.tarot-spread-locked .card-3d:not(.flipped) {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+.tarot-spread-locked .card-3d:not(.flipped):hover .card-inner {
+  transform: none;
+}
+.tarot-spread-locked .card-3d:not(.flipped):hover {
+  filter: none;
+}
 
 /* Selected: lift higher (2D transform on wrapper avoids 3D foreshortening) */
 .card-3d.selected { z-index: 2; }
@@ -416,7 +434,7 @@ body.resizing * {
 }
 .reading-row {
   display: grid;
-  grid-template-columns: 2rem 1fr auto;
+  grid-template-columns: 2rem minmax(4.5rem, 0.65fr) minmax(8rem, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.85rem;
@@ -427,6 +445,13 @@ body.resizing * {
 }
 .reading-row.suit-red   .reading-suit-icon { color: #f87171; }
 .reading-row.suit-black .reading-suit-icon { color: #e2d9f3; }
+.reading-position {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 
 .tarot-controls {
   display: flex;
@@ -689,8 +714,18 @@ body.resizing * {
     gap: 0.35rem 0.55rem;
     padding: 0.55rem 0.65rem;
   }
+  body.app-shell .pane-sidebar .reading-position,
+  body.app-shell .pane-sidebar .reading-card-name,
   body.app-shell .pane-sidebar .reading-meaning {
     grid-column: 2;
+  }
+  body.app-shell .pane-sidebar .reading-position {
+    font-size: 0.66rem;
+  }
+  body.app-shell .pane-sidebar .reading-card-name {
+    font-size: 0.95rem;
+  }
+  body.app-shell .pane-sidebar .reading-meaning {
     font-size: 0.86rem;
   }
   body.app-shell .pane-sidebar .tarot-controls {
