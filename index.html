@@ -8,8 +8,15 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>" />
     <link rel="stylesheet" href="app.css" />
   </head>
-  <body>
-    <main id="app" role="main"></main>
+  <body class="app-shell">
+    <div class="layout" id="layout">
+      <aside class="pane pane-sidebar" id="sidebarSlot" aria-label="Spread"></aside>
+      <div class="resize-handle" id="resizeHandle" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" tabindex="0"></div>
+      <main class="pane pane-chat" id="chatSlot" aria-label="Chat"></main>
+    </div>
+
     <script src="app.js"></script>
+    <script src="chat.js"></script>
+    <script src="layout.js"></script>
   </body>
 </html>

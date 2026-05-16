@@ -46,6 +46,197 @@ button { cursor: pointer; font-family: inherit; }
    ============================================================ */
 #app { min-height: 100vh; }
 
+/* ============================================================
+   APP SHELL — two-pane layout (index.html)
+   ============================================================ */
+body.app-shell {
+  overflow: hidden; /* shell scrolls inside its panes */
+}
+.layout {
+  --sidebar-width: 480px;
+  --handle-width: 6px;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) var(--handle-width) 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+.pane {
+  overflow: auto;
+  min-width: 0; /* allow grid pane to shrink below content size */
+}
+.pane-sidebar {
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+}
+.pane-chat {
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.resize-handle {
+  background: var(--border);
+  cursor: col-resize;
+  position: relative;
+  transition: background var(--ease);
+}
+.resize-handle:hover,
+.resize-handle:focus-visible,
+body.resizing .resize-handle {
+  background: var(--purple);
+  outline: none;
+}
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  inset: 0 -3px; /* widen hit target */
+}
+body.resizing,
+body.resizing * {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+/* Inside the sidebar, the spread "page" should fill the pane.
+   Loosen the centered max-width and trim padding. */
+.pane-sidebar .page {
+  max-width: none;
+  padding: 1.25rem 1rem 2rem;
+}
+.pane-sidebar .page-header  { margin-bottom: 1.25rem; }
+
+/* Spread inside the sidebar: auto-fit columns to whatever
+   width the pane currently has. Cards keep their 5:7 ratio. */
+.pane-sidebar .tarot-spread {
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 0.4rem;
+  padding: 1.25rem 0.75rem;
+}
+
+/* ============================================================
+   CHAT PANE
+   ============================================================ */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.chat-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 0;
+}
+.chat-header { text-align: center; margin-bottom: 0.5rem; }
+.chat-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 50%, #d8b4fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.chat-subtitle { color: var(--text-muted); font-size: 0.85rem; }
+
+.chat-thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.chat-empty {
+  margin: auto;
+  color: var(--text-dim);
+  text-align: center;
+  font-style: italic;
+}
+.chat-empty-hint { font-size: 0.85rem; margin-top: 0.5rem; }
+
+.chat-msg {
+  display: flex;
+  width: 100%;
+}
+.chat-msg-user { justify-content: flex-end; }
+.chat-msg-assistant { justify-content: flex-start; }
+.chat-bubble {
+  max-width: 75%;
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.chat-msg-user .chat-bubble {
+  background: var(--purple-h);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg-assistant .chat-bubble {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.chat-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-md);
+  border-radius: 18px;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+.chat-composer:focus-within {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px var(--purple-glow);
+}
+.chat-input {
+  flex: 1;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  outline: none;
+  resize: none;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  padding: 0.35rem 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.chat-input::placeholder { color: var(--text-dim); }
+.chat-send {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--purple-h);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter var(--ease), transform 0.06s ease;
+}
+.chat-send:hover  { filter: brightness(1.15); }
+.chat-send:active { transform: translateY(1px); }
+.chat-send:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
 .page {
   max-width: 1400px;
   margin: 0 auto;
@@ -398,19 +589,38 @@ button { cursor: pointer; font-family: inherit; }
 
 /* ============================================================
    RESPONSIVE
+   These rules apply only when the spread is NOT inside the
+   sidebar pane (lore page or standalone sidebar-spread.html).
+   Inside the sidebar, the spread uses auto-fill columns.
    ============================================================ */
 @media (max-width: 900px) {
-  .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.5rem; padding: 1.25rem 0.75rem 1.75rem; }
+  body:not(.app-shell) .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.5rem; padding: 1.25rem 0.75rem 1.75rem; }
 }
 @media (max-width: 640px) {
-  .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.35rem; padding: 0.75rem 0.5rem 1rem; }
-  .card-ornament    { font-size: 1.2rem; }
-  .card-center-suit { font-size: 1.2rem; }
-  .rank-label { font-size: 0.5rem; }
-  .suit-label { font-size: 0.5rem; }
+  body:not(.app-shell) .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.35rem; padding: 0.75rem 0.5rem 1rem; }
+  body:not(.app-shell) .card-ornament    { font-size: 1.2rem; }
+  body:not(.app-shell) .card-center-suit { font-size: 1.2rem; }
+  body:not(.app-shell) .rank-label { font-size: 0.5rem; }
+  body:not(.app-shell) .suit-label { font-size: 0.5rem; }
 }
 @media (max-width: 420px) {
-  .tarot-spread { grid-template-columns: repeat(6, 1fr); }
+  body:not(.app-shell) .tarot-spread { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* Narrow viewport: stack the two panes vertically instead of side-by-side. */
+@media (max-width: 720px) {
+  body.app-shell .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(40vh, auto) 6px 1fr;
+    height: 100vh;
+  }
+  body.app-shell .resize-handle {
+    cursor: row-resize;
+  }
+  body.app-shell .pane-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
 }
 
 /* ============================================================

@@ -1,0 +1,31 @@
+<!--
+  chat.html — LLM chat scaffold, injected into index.html.
+  Scaffold only: input echoes to the thread, no model wired up yet.
+-->
+<section class="chat-root">
+  <header class="chat-header">
+    <h2 class="chat-title">Reading</h2>
+    <p class="chat-subtitle">Ask a question. Draw cards. Find perspective.</p>
+  </header>
+
+  <div class="chat-thread" id="chatThread" role="log" aria-live="polite" aria-label="Chat messages">
+    <div class="chat-empty">
+      <p>This is where your reading will appear.</p>
+      <p class="chat-empty-hint">Type a question below to begin.</p>
+    </div>
+  </div>
+
+  <form class="chat-composer" id="chatComposer" autocomplete="off">
+    <label class="visually-hidden" for="chatInput">Message</label>
+    <textarea
+      id="chatInput"
+      class="chat-input"
+      rows="1"
+      placeholder="Ask the cards…"
+      aria-label="Message"
+    ></textarea>
+    <button type="submit" class="chat-send" id="chatSend" aria-label="Send message">
+      <span aria-hidden="true">↑</span>
+    </button>
+  </form>
+</section>
