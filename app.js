@@ -153,56 +153,47 @@ function fibUpTo(max) {
 }
 
 /* -----------------------------------------------
-   Page render
+   Boot — wire up controls inside an already-rendered
+   sidebar-spread root (markup lives in
+   sidebar-spread.html and is injected by index.html).
 ----------------------------------------------- */
-function renderTarot() {
-  const el = document.createElement('section');
-  el.className = 'page page-tarot';
+function bootSidebarSpread(rootEl) {
+  const spreadEl   = rootEl.querySelector('#tarotSpread');
+  const readingEl  = rootEl.querySelector('#tarotReading');
+  const drawCount  = rootEl.querySelector('#drawCount');
+  const newBtn     = rootEl.querySelector('#newReadingBtn');
 
-  const fibs = fibUpTo(51);
-  const options = fibs.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (!spreadEl || !readingEl || !drawCount || !newBtn) {
+    console.warn('[sidebar-spread] missing expected elements in root');
+    return;
+  }
 
-  el.innerHTML = `
-    <div class="page-toolbar">
-      <a class="nav-link" href="lore.html">Lore →</a>
-      <label class="draw-count">
-        <span class="draw-count-label">Draw</span>
-        <select id="drawCount" aria-label="Number of cards to draw">${options}</select>
-      </label>
-    </div>
-
-    <header class="page-header">
-      <h1>Tarot 52</h1>
-      <p class="page-subtitle">Choose a card — let the deck decide.</p>
-    </header>
-
-    <div class="tarot-spread" id="tarotSpread"></div>
-
-    <div class="tarot-reading" id="tarotReading"></div>
-
-    <div class="tarot-controls">
-      <button class="btn-primary" id="newReadingBtn">New Spread</button>
-    </div>
-  `;
-
-  const spreadEl   = el.querySelector('#tarotSpread');
-  const readingEl  = el.querySelector('#tarotReading');
-  const drawCount  = el.querySelector('#drawCount');
+  // Populate Fibonacci draw-count options if not already present.
+  if (drawCount.options.length === 0) {
+    fibUpTo(51).forEach(n => {
+      const opt = document.createElement('option');
+      opt.value = String(n);
+      opt.textContent = String(n);
+      drawCount.appendChild(opt);
+    });
+  }
 
   const start = () => initTarotSpread(spreadEl, readingEl, parseInt(drawCount.value, 10));
 
   start();
-
   drawCount.addEventListener('change', start);
-  el.querySelector('#newReadingBtn').addEventListener('click', start);
-
-  return el;
+  newBtn.addEventListener('click', start);
 }
 
-/* -----------------------------------------------
-   Bootstrap
------------------------------------------------ */
+// Expose for the index.html bootstrap to call after injection.
+window.bootSidebarSpread = bootSidebarSpread;
+
+// Standalone mode: if sidebar-spread.html is opened directly,
+// markup will already be in the DOM at load time.
 window.addEventListener('DOMContentLoaded', () => {
-  const app = document.getElementById('app');
-  app.appendChild(renderTarot());
+  const root = document.querySelector('.sidebar-spread-root');
+  if (root && !root.dataset.booted) {
+    root.dataset.booted = '1';
+    bootSidebarSpread(root);
+  }
 });
