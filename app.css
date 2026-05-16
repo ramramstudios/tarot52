@@ -24,6 +24,8 @@
   --radius:    10px;
   --radius-sm: 7px;
   --ease:      0.2s ease;
+
+  --mobile-safe-top: env(safe-area-inset-top);
 }
 
 /* ---- Reset ---- */
@@ -667,6 +669,9 @@ body.resizing * {
 
 /* Narrow viewport: stack the two panes vertically instead of side-by-side. */
 @media (max-width: 720px) {
+  body.app-shell {
+    --mobile-safe-top: env(safe-area-inset-top);
+  }
   body.app-shell .layout {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 58dvh) minmax(0, 42dvh);
@@ -699,9 +704,9 @@ body.resizing * {
     z-index: 4;
     grid-row: 1;
     gap: 0.5rem;
-    min-height: calc(52px + env(safe-area-inset-top));
+    min-height: calc(52px + var(--mobile-safe-top));
     margin: 0;
-    padding: calc(0.45rem + env(safe-area-inset-top)) 0.65rem 0.45rem;
+    padding: calc(0.45rem + var(--mobile-safe-top)) 0.65rem 0.45rem;
     background: rgba(10, 10, 14, 0.94);
     border-bottom: 1px solid var(--border);
     -webkit-backdrop-filter: blur(10px);
@@ -841,6 +846,14 @@ body.resizing * {
   body.app-shell .chat-send {
     width: 34px;
     height: 34px;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 720px) {
+    body.app-shell {
+      --mobile-safe-top: max(env(safe-area-inset-top), 38px);
+    }
   }
 }
 
