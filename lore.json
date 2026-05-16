@@ -1,0 +1,332 @@
+{
+  "_about": "Tarot 52 lore: how the 52 poker-deck cards map to the Rider-Waite Smith (RWS) tarot Minor Arcana. RWS court cards are Page/Knight/Queen/King; standard poker decks have Jack/Queen/King, so the Knight is dropped (Jack ↔ Page). Major Arcana and Knights are not present in a 52-card deck. Suit mapping used here: Wands ↔ Clubs, Cups ↔ Hearts, Swords ↔ Spades, Pentacles ↔ Diamonds. Card descriptions are condensed from rider-waite.com, which presents Arthur Edward Waite's _Pictorial Key to the Tarot_ (1910, public domain).",
+  "suits": {
+    "Clubs":    { "tarot": "Wands",     "element": "Fire",  "symbol": "♣" },
+    "Hearts":   { "tarot": "Cups",      "element": "Water", "symbol": "♥" },
+    "Spades":   { "tarot": "Swords",    "element": "Air",   "symbol": "♠" },
+    "Diamonds": { "tarot": "Pentacles", "element": "Earth", "symbol": "♦" }
+  },
+  "court_mapping": {
+    "Jack":  "Page",
+    "Queen": "Queen",
+    "King":  "King",
+    "_omitted": "Knight (no corresponding poker rank)"
+  },
+  "cards": [
+    {
+      "poker": "Ace of Clubs",
+      "term": "Inspiration",
+      "tarot": "Ace of Wands",
+      "description": "A hand issuing from a cloud grasps a stout wand or club. Creation, invention, enterprise, the powers which result in these; principle, beginning, source; family origins, virility, the foundation of ventures; money, fortune, inheritance."
+    },
+    {
+      "poker": "2 of Clubs",
+      "term": "Decision",
+      "tarot": "Two of Wands",
+      "description": "A tall man stands on a battlemented roof overlooking sea and shore. He holds a globe in his right hand while a staff rests in his left on the battlement; another staff is fixed in a ring. Riches, fortune, magnificence; also physical suffering, disease, chagrin, sadness, mortification. A lord contemplating his dominion and a globe — evoking the melancholy of Alexander despite worldly wealth."
+    },
+    {
+      "poker": "3 of Clubs",
+      "term": "Progress",
+      "tarot": "Three of Wands",
+      "description": "A dignified figure stands with his back turned, gazing from a cliff toward ships sailing across the sea. Three staffs are planted in the ground, and he leans slightly upon one. Established strength, enterprise, effort, trade, commerce, discovery; successful business collaboration, as though a prosperous merchant were offering assistance to help advance your own endeavors."
+    },
+    {
+      "poker": "4 of Clubs",
+      "term": "Celebration",
+      "tarot": "Four of Wands",
+      "description": "Four large staves in the foreground with a garland suspended between them. Two female figures hold bouquets, and a bridge spans a moat leading to an old manor house. Country life, haven of refuge, a species of domestic harvest-home, repose, concord, harmony, prosperity, peace, and the perfected work of these."
+    },
+    {
+      "poker": "5 of Clubs",
+      "term": "Struggle",
+      "tarot": "Five of Wands",
+      "description": "A posse of youths brandishing staves, as if in sport or strife. It is mimic warfare. Imitation and sham conflict, but also the intense competition and struggle involved in pursuing wealth and fortune; in some readings, gain and opulence."
+    },
+    {
+      "poker": "6 of Clubs",
+      "term": "Success",
+      "tarot": "Six of Wands",
+      "description": "A laurelled horseman carries a staff adorned with a laurel crown, flanked by footmen also bearing staves. A victor triumphing; great news delivered with ceremonial importance, the fulfillment of hope, expectation achieved, victory and favorable tidings."
+    },
+    {
+      "poker": "7 of Clubs",
+      "term": "Challenge",
+      "tarot": "Seven of Wands",
+      "description": "A young man on a craggy eminence brandishes a staff; six other staves are raised toward him from below. Valor and courage — one person maintaining advantage against six attackers. On the intellectual plane, discussion and verbal conflict; in business, negotiations, trade competition, commercial rivalry. A card of success, since the combatant holds the superior position."
+    },
+    {
+      "poker": "8 of Clubs",
+      "term": "Movement",
+      "tarot": "Eight of Wands",
+      "description": "Motion through the immovable — a flight of wands through an open country, drawing to the term of their course. Activity in undertakings; swiftness, like that of an express messenger; great haste and great hope; speed toward an end promising assured felicity; that which is on the move; the arrows of love."
+    },
+    {
+      "poker": "9 of Clubs",
+      "term": "Resilience",
+      "tarot": "Nine of Wands",
+      "description": "A figure leans on his staff with an expectant, watchful expression, as if bracing for confrontation. Behind him stand eight additional staves arranged upright, resembling a defensive palisade. Strength in opposition: one will meet any attack with boldness and may prove a formidable opponent. Associated meanings: delay, suspension, adjournment."
+    },
+    {
+      "poker": "10 of Clubs",
+      "term": "Burden",
+      "tarot": "Ten of Wands",
+      "description": "A man oppressed by the weight of the ten staves which he is carrying. Oppression; also fortune, gain, success of various kinds — alongside the burden these bring. Also false appearances, disguise, betrayal. The figure's destination may be negatively affected by what he carries."
+    },
+    {
+      "poker": "Jack of Clubs",
+      "term": "Enthusiasm",
+      "tarot": "Page of Wands",
+      "description": "A youthful male figure in a proclamatory stance, unknown but faithful, his tidings strange. A dark young man, faithful, a lover, an envoy, a postman. Favorable testimony about someone."
+    },
+    {
+      "poker": "Queen of Clubs",
+      "term": "Courage",
+      "tarot": "Queen of Wands",
+      "description": "The wands are depicted in leaf, symbolizing a suit of life and animation. The Queen's personality mirrors the King's but demonstrates greater magnetism. A dark woman, countrywoman, friendly, chaste, loving, honourable. If positioned near a man's significator she shows favorable disposition toward him; near a woman's significator she takes interest in the querent. Love of money or business success."
+    },
+    {
+      "poker": "King of Clubs",
+      "term": "Leadership",
+      "tarot": "King of Wands",
+      "description": "The King holds an uplifted flowering wand and wears a cap of maintenance beneath his crown. A lion symbol is emblazoned on his throne's back. Dark man, friendly, countryman, generally married, honest and conscientious. May indicate news of an unexpected inheritance arriving soon."
+    },
+
+    {
+      "poker": "Ace of Hearts",
+      "term": "Emotion",
+      "tarot": "Ace of Cups",
+      "description": "A hand emerges from a cloud, holding a cup from which four streams flow. Water lilies float below, and a dove descends carrying a cross-marked Host to place in the cup, with dew falling around. House of the true heart, joy, content, abode, nourishment, abundance, fertility; Holy Table, felicity hereof."
+    },
+    {
+      "poker": "2 of Hearts",
+      "term": "Unity",
+      "tarot": "Two of Cups",
+      "description": "A youth and maiden pledge to one another while their cups are raised. Above the cups stands the Caduceus of Hermes, flanked by great wings with a lion's head appearing between them. Love, passion, friendship, affinity, union, concord, sympathy, the interrelation of the sexes, and that desire which is not in Nature, but by which Nature is sanctified."
+    },
+    {
+      "poker": "3 of Hearts",
+      "term": "Collaboration",
+      "tarot": "Three of Cups",
+      "description": "Maidens in a garden-ground with cups uplifted, as if pledging one another. The conclusion of any matter characterized by abundance, perfection and joy; a positive outcome, success, fulfillment, comfort, and restoration; the happy resolution of circumstances."
+    },
+    {
+      "poker": "4 of Hearts",
+      "term": "Apathy",
+      "tarot": "Four of Cups",
+      "description": "A seated young man beneath a tree observes three cups on the grass before him, while a cloud-issuing arm offers him a fourth cup. His demeanor reflects dissatisfaction with his circumstances. Weariness, disgust, aversion, imaginary vexations — emotional exhaustion from worldly indulgences. A spiritual offering that fails to inspire the figure; also blended pleasure."
+    },
+    {
+      "poker": "5 of Hearts",
+      "term": "Regret",
+      "tarot": "Five of Cups",
+      "description": "A figure in dark robes gazes sideways at three overturned cups, while two upright cups remain behind him. A bridge and distant keep are visible in the background. Loss — though something remains over; three have been taken, but two are left. Inheritance and legacy that may fall short of expectations; marriage tinged with disappointment or dissatisfaction."
+    },
+    {
+      "poker": "6 of Hearts",
+      "term": "Nostalgia",
+      "tarot": "Six of Cups",
+      "description": "Children in an old garden, their cups filled with flowers. Nostalgia and reflection on the past, particularly childhood; happiness and contentment derived from bygone experiences. Alternatively: new relationships, fresh knowledge, unfamiliar circumstances — the children enjoying themselves in a new setting."
+    },
+    {
+      "poker": "7 of Hearts",
+      "term": "Options",
+      "tarot": "Seven of Cups",
+      "description": "Strange chalices of vision — imagery of the fantastic spirit. Fairy favours, images of reflection, sentiment, imagination, things seen in the glass of contemplation; some attainment in these degrees, but nothing permanent or substantial is suggested."
+    },
+    {
+      "poker": "8 of Hearts",
+      "term": "Abandonment",
+      "tarot": "Eight of Cups",
+      "description": "A man of dejected aspect is deserting the cups of his felicity, enterprise, undertaking or previous concern. Abandonment of what was once valued; the decline of a matter, or the revelation that something previously considered significant is unimportant. Alternatively: joy, gentleness, timidity, honor, or modesty."
+    },
+    {
+      "poker": "9 of Hearts",
+      "term": "Contentment",
+      "tarot": "Nine of Cups",
+      "description": "A well-dressed figure sits contentedly before nine stacked cups, with wine and refreshments displayed on an arched counter behind him, suggesting future abundance and security. Concord, contentment, physical bien-être; also victory, success, advantage; satisfaction for the Querent."
+    },
+    {
+      "poker": "10 of Hearts",
+      "term": "Bliss",
+      "tarot": "Ten of Cups",
+      "description": "A husband and wife stand together observing a rainbow of ten cups. The man's right arm embraces the woman while his left arm points upward; she raises her right arm in response. Two children dance nearby, while a home is visible in the background. Contentment, repose of the entire heart; the perfection of human love and friendship. May indicate a person managing the querent's affairs, or the querent's town or country of residence."
+    },
+    {
+      "poker": "Jack of Hearts",
+      "term": "Creativity",
+      "tarot": "Page of Cups",
+      "description": "A fair, youthful page with a studious expression contemplates a fish rising from a cup to look at him — thoughts and mental concepts becoming visible. A fair young man inclined toward service; a studious youth; news or messages; application, reflection, meditation applied to practical matters."
+    },
+    {
+      "poker": "Queen of Hearts",
+      "term": "Compassion",
+      "tarot": "Queen of Cups",
+      "description": "A beautiful, fair woman, dreamy and visionary, gazes into a cup. She embodies both contemplative insight and active engagement — her activity feeds her dream. A good, fair, honest, devoted woman who serves the Querent; loving intelligence and visionary gifts; success, happiness, pleasure; wisdom and virtue; an ideal spouse and devoted mother."
+    },
+    {
+      "poker": "King of Hearts",
+      "term": "Balance",
+      "tarot": "King of Cups",
+      "description": "A man seated on a throne set upon the sea, holding a short sceptre in his left hand and a cup in his right. A ship rides on one side and a dolphin leaps on the other. Fair man, man of business, law, or divinity; responsible, disposed to oblige the Querent; equity, art and science, including those who profess these; creative intelligence."
+    },
+
+    {
+      "poker": "Ace of Spades",
+      "term": "Lucidity",
+      "tarot": "Ace of Swords",
+      "description": "A hand issues from a cloud, grasping a sword, the point of which is encircled by a crown. Triumph and conquest; predominance in all matters; powerful force applicable to both love and conflict. The crown symbolizes significance beyond typical fortune-telling scope."
+    },
+    {
+      "poker": "2 of Spades",
+      "term": "Impasse",
+      "tarot": "Two of Swords",
+      "description": "A hoodwinked female figure balances two swords upon her shoulders. Conformity and balance; courage, friendship, harmony in conflict; tenderness, affection, intimacy — though these favorable readings should be understood with qualification, since swords generally don't symbolize beneficial forces in human matters."
+    },
+    {
+      "poker": "3 of Spades",
+      "term": "Heartbreak",
+      "tarot": "Three of Swords",
+      "description": "Three swords piercing a heart; cloud and rain behind. Removal, absence, delay, division, rupture, dispersion, and all that the design signifies naturally, being too simple and obvious to call for specific enumeration."
+    },
+    {
+      "poker": "4 of Spades",
+      "term": "Rest",
+      "tarot": "Four of Swords",
+      "description": "The effigy of a knight in the attitude of prayer, at full length upon his tomb. Vigilance, retreat, solitude, hermit's repose, exile, tomb and coffin."
+    },
+    {
+      "poker": "5 of Spades",
+      "term": "Conflict",
+      "tarot": "Five of Swords",
+      "description": "A man stands victoriously on a battlefield, looking disdainfully at two retreating figures. The defeated opponents leave their swords behind while the victor carries two swords on his shoulder and holds a third, its point toward the ground. Degradation, destruction, revocation, infamy, dishonour, loss, with the variants and analogues of these."
+    },
+    {
+      "poker": "6 of Spades",
+      "term": "Transition",
+      "tarot": "Six of Swords",
+      "description": "A ferryman carrying passengers in his punt to the further shore. The course is smooth, and seeing that the freight is light, it may be noted that the work is not beyond his strength. Journey by water, route, way, envoy, commissionary, expedient."
+    },
+    {
+      "poker": "7 of Spades",
+      "term": "Betrayal",
+      "tarot": "Seven of Swords",
+      "description": "A man in the act of carrying away five swords rapidly; the two others of the card remain stuck in the ground. A camp is close at hand. Design, attempt, wish, hope, confidence; also quarrelling, a plan that may fail, annoyance. An ambiguous card."
+    },
+    {
+      "poker": "8 of Spades",
+      "term": "Captive",
+      "tarot": "Eight of Swords",
+      "description": "A woman, bound and hoodwinked, with the swords of the card about her — temporary constraint rather than permanent bondage. Bad news, violent chagrin, crisis, censure, power in trammels, conflict, calumny, sickness."
+    },
+    {
+      "poker": "9 of Spades",
+      "term": "Anxiety",
+      "tarot": "Nine of Swords",
+      "description": "A figure sits on a bed in distress, with nine swords positioned above her. Profound sorrow and desolation. Death, failure, miscarriage, delay, deception, disappointment, despair."
+    },
+    {
+      "poker": "10 of Spades",
+      "term": "Defeat",
+      "tarot": "Ten of Swords",
+      "description": "A prostrate figure, pierced by all the swords belonging to the card. Pain, affliction, tears, sadness, desolation as indicated by its design. Specifically does not represent violent death."
+    },
+    {
+      "poker": "Jack of Spades",
+      "term": "Curiosity",
+      "tarot": "Page of Swords",
+      "description": "A young, agile figure walks swiftly across rough terrain while holding a sword upright with both hands. The figure moves alertly and cautiously, constantly looking about — as if an expected enemy might appear at any moment — with wild clouds swirling in the background. Authority, overseeing, secret service, vigilance, spying, examination, and the qualities thereto belonging."
+    },
+    {
+      "poker": "Queen of Spades",
+      "term": "Independence",
+      "tarot": "Queen of Swords",
+      "description": "The Queen sits with her right hand holding a sword upright, its hilt resting on her chair's arm. Her left hand extends outward with raised arm. Her expression appears stern yet marked by sorrow, suggesting familiarity with suffering rather than mercy or power. Widowhood, female sadness and embarrassment, absence, sterility, mourning, privation, separation."
+    },
+    {
+      "poker": "King of Spades",
+      "term": "Intellect",
+      "tarot": "King of Swords",
+      "description": "The figure sits in judgment, holding an unsheathed sword — the conventional symbol of justice, representing the power of life and death through his office. Whatsoever arises out of the idea of judgment and all its connexions — power, command, authority, militant intelligence, law, offices of the crown."
+    },
+
+    {
+      "poker": "Ace of Diamonds",
+      "term": "Opportunity",
+      "tarot": "Ace of Pentacles",
+      "description": "A hand, issuing as usual from a cloud, holds up a pentacle. Perfect contentment, felicity, and ecstasy; also speedy intelligence and gold."
+    },
+    {
+      "poker": "2 of Diamonds",
+      "term": "Juggling",
+      "tarot": "Two of Pentacles",
+      "description": "A young man in the act of dancing has a pentacle in either hand, joined by that endless cord which is like the number 8 reversed. Gaiety, recreation, enjoyment; also news and written messages; obstacles, agitation, trouble, complications."
+    },
+    {
+      "poker": "3 of Diamonds",
+      "term": "Teamwork",
+      "tarot": "Three of Pentacles",
+      "description": "A sculptor at his work in a monastery. The apprentice from the Eight of Pentacles has matured and now works earnestly in his craft. Métier, trade, skilled labour; nobility, aristocracy, renown, glory."
+    },
+    {
+      "poker": "4 of Diamonds",
+      "term": "Conservation",
+      "tarot": "Four of Pentacles",
+      "description": "A crowned figure holds a pentacle over their crown while clasping another; two additional pentacles are positioned beneath their feet. The figure maintains a firm grip on their possessions. The surety of possessions, cleaving to that which one has; gift, legacy, inheritance."
+    },
+    {
+      "poker": "5 of Diamonds",
+      "term": "Poverty",
+      "tarot": "Five of Pentacles",
+      "description": "Two mendicants in a snow-storm pass a lighted casement. Material hardship and destitution. Some practitioners interpret it as representing love and relationships — spouses, partners, friends, or lovers — suggesting harmony and affinity; these interpretations are considered incompatible by Waite."
+    },
+    {
+      "poker": "6 of Diamonds",
+      "term": "Generosity",
+      "tarot": "Six of Pentacles",
+      "description": "A person in the guise of a merchant weighs money in a pair of scales and distributes it to the needy and distressed — representing both success and a charitable nature. Presents, gifts, gratification, attention, vigilance, present prosperity; now is an opportune time for giving or receiving."
+    },
+    {
+      "poker": "7 of Diamonds",
+      "term": "Planning",
+      "tarot": "Seven of Pentacles",
+      "description": "A young man, leaning on his staff, looks intently at seven pentacles attached to a clump of greenery on his right; one would say that these were his treasures and that his heart was there. Primarily money, business, and barter; also quarrels and altercations; also innocence, ingenuity, purgation."
+    },
+    {
+      "poker": "8 of Diamonds",
+      "term": "Practice",
+      "tarot": "Eight of Pentacles",
+      "description": "An artist in stone at his work, which he exhibits in the form of trophies. Work, employment, commission, craftsmanship, and skill in craft and business, potentially in an early stage of development."
+    },
+    {
+      "poker": "9 of Diamonds",
+      "term": "Sufficiency",
+      "tarot": "Nine of Pentacles",
+      "description": "A woman with a bird on her wrist stands in a lush garden filled with grapevines near a manor house — a wide domain, suggesting plenty in all things. Prudence, safety, success, accomplishment, certitude, discernment."
+    },
+    {
+      "poker": "10 of Diamonds",
+      "term": "Prosperity",
+      "tarot": "Ten of Pentacles",
+      "description": "A man and woman stand beneath an archway leading to a house. They're with a child who observes two dogs approaching an elderly seated figure. The child's hand rests on one of the dogs. Gain, riches; family matters, archives, extraction, the abode of a family. Wealth, family heritage, domestic prosperity."
+    },
+    {
+      "poker": "Jack of Diamonds",
+      "term": "Manifestation",
+      "tarot": "Page of Pentacles",
+      "description": "A young figure gazes intently at a pentacle floating above his outstretched hands, moving slowly while seeming oblivious to his surroundings. Application, study, scholarship, reflection; news, messages, and their messenger; rule and management."
+    },
+    {
+      "poker": "Queen of Diamonds",
+      "term": "Practicality",
+      "tarot": "Queen of Pentacles",
+      "description": "A dark woman of great soul with serious intelligence, contemplating her pentacle symbol with deep focus. Opulence, generosity, magnificence, security, liberty."
+    },
+    {
+      "poker": "King of Diamonds",
+      "term": "Stability",
+      "tarot": "King of Pentacles",
+      "description": "The figure has a darkened face suggesting courage but with a lethargic tendency. A bull's head appears as a recurring symbol on the throne. The pentagram is engraved or emblazoned throughout, representing the four elements in human nature and their governance. Valour, realizing intelligence, business and normal intellectual aptitude, sometimes mathematical gifts and attainments of this kind; success in these paths."
+    }
+  ]
+}

@@ -235,11 +235,13 @@ button { cursor: pointer; font-family: inherit; }
   margin-bottom: 2.5rem;
 }
 
-/* Toolbar in upper-right with the draw-count dropdown */
+/* Toolbar at top of page: lore link on left, draw-count on right */
 .page-toolbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.5rem;
+  gap: 1rem;
 }
 .draw-count {
   display: inline-flex;
@@ -282,6 +284,117 @@ button { cursor: pointer; font-family: inherit; }
 .btn-primary:hover  { filter: brightness(1.15); box-shadow: var(--shadow-md); }
 .btn-primary:active { transform: translateY(1px); }
 .btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ============================================================
+   PAGE NAV (cross-page link)
+   ============================================================ */
+.page-nav {
+  margin-bottom: 0.75rem;
+}
+.nav-link {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--ease), border-color var(--ease);
+}
+.nav-link:hover { color: var(--purple); border-color: var(--purple); }
+.page-toolbar .nav-link { margin-right: 1rem; }
+
+/* ============================================================
+   LORE PAGE
+   ============================================================ */
+.lore-intro {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  max-width: 760px;
+  margin: 0 auto 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.lore-suits-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+.lore-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem 1.75rem;
+}
+.lore-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+.lore-suit-symbol {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.lore-suit-symbol.suit-red   { color: #ef4444; }
+.lore-suit-symbol.suit-black { color: #e2d9f3; }
+
+.lore-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.lore-table thead th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-md);
+}
+.lore-table tbody td {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.lore-table tbody tr:last-child td { border-bottom: none; }
+.lore-table tbody tr:hover { background: rgba(139, 92, 246, 0.04); }
+
+.col-card  { width: 7rem;  white-space: nowrap; font-weight: 600; }
+.col-term  { width: 8rem;  color: var(--purple); font-weight: 600; }
+.col-tarot { width: 11rem; color: #e2d9f3; }
+.col-desc  { color: var(--text); }
+
+.poker-rank { margin-right: 0.3rem; }
+.poker-suit { font-size: 1.05rem; }
+.poker-suit.suit-red   { color: #ef4444; }
+.poker-suit.suit-black { color: #e2d9f3; }
+
+@media (max-width: 760px) {
+  .lore-table, .lore-table thead, .lore-table tbody, .lore-table tr, .lore-table td, .lore-table th {
+    display: block;
+  }
+  .lore-table thead { display: none; }
+  .lore-table tbody tr {
+    border-bottom: 1px solid var(--border-md);
+    padding: 0.75rem 0;
+  }
+  .lore-table tbody tr:last-child { border-bottom: none; }
+  .lore-table tbody td {
+    border: none;
+    padding: 0.15rem 0;
+  }
+  .col-card  { font-size: 1.05rem; margin-bottom: 0.15rem; }
+  .col-term  { font-size: 0.95rem; }
+  .col-tarot { font-size: 0.88rem; color: var(--text-muted); }
+  .col-desc  { margin-top: 0.4rem; font-size: 0.92rem; }
+}
 
 /* ============================================================
    RESPONSIVE

@@ -164,6 +164,7 @@ function renderTarot() {
 
   el.innerHTML = `
     <div class="page-toolbar">
+      <a class="nav-link" href="lore.html">Lore →</a>
       <label class="draw-count">
         <span class="draw-count-label">Draw</span>
         <select id="drawCount" aria-label="Number of cards to draw">${options}</select>
