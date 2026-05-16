@@ -82,3 +82,7 @@ Then open `http://localhost:8000`.
 ## Attribution
 
 Card descriptions in `lore.json` are condensed from Arthur Edward Waite, *The Pictorial Key to the Tarot* (William Rider & Son, 1910), now in the public domain. Sourced via [rider-waite.com](https://rider-waite.com/symbolism/).
+
+## Notes
+
+Will need a system prompt that handles any question and knows how to filter it through the meaning of the cards to have the question influcenced in a way worth reading. Should probably make the prompt be submitted BEFORE the card draw. Also, maybe the different card fibonnacci selection (1, 2, 3, 5, 8...) indicates a certain type of system prompt, e.g. '3' gives a past/present/future style reading; or a '32' gives a very in depth detailed meaning with the order of the cards drawn affects different aspects of the response.
