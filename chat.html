@@ -4,8 +4,21 @@
 -->
 <section class="chat-root">
   <header class="chat-header">
-    <h2 class="chat-title">Tarot Chat</h2>
-    <p class="chat-subtitle">Ask first. Draw second. Read in context.</p>
+    <button
+      type="button"
+      class="chat-collapse-toggle"
+      id="chatCollapseToggle"
+      aria-pressed="false"
+      aria-label="Hide the spread and focus the chat"
+      title="Hide spread"
+    >
+      <span class="chat-collapse-icon" aria-hidden="true"></span>
+      <span class="chat-collapse-label">Hide spread</span>
+    </button>
+    <div class="chat-header-text">
+      <h2 class="chat-title">Tarot Chat</h2>
+      <p class="chat-subtitle">Ask first. Draw second. Read in context.</p>
+    </div>
   </header>
 
   <div class="chat-thread" id="chatThread" role="log" aria-live="polite" aria-label="Chat messages">

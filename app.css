@@ -77,6 +77,22 @@ body.app-shell {
   max-width: 100%;
   overflow: hidden;
   overscroll-behavior-x: none;
+  transition: grid-template-columns 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Collapsed (chat-only) mode: sidebar + handle slide out of view.
+   Cards inside stay laid out so toggling back is instant. */
+.layout.chat-fullscreen {
+  grid-template-columns: 0px 0px 1fr;
+}
+.layout.chat-fullscreen .pane-sidebar,
+.layout.chat-fullscreen .resize-handle {
+  visibility: hidden;
+}
+/* Disable the in-layout transition while the user is actively dragging
+   the resize handle — otherwise it lags. */
+body.resizing .layout {
+  transition: none;
 }
 .pane {
   overflow: auto;
@@ -157,7 +173,88 @@ body.resizing * {
   margin: 0 auto;
   padding: 1.5rem 1.25rem 0;
 }
-.chat-header { text-align: center; margin-bottom: 0.5rem; }
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.chat-header-text {
+  flex: 1;
+  text-align: center;
+  /* Keep the title visually centered even with the toggle on the left.
+     The toggle's reserved space is mirrored by a transparent pseudo-element. */
+  padding-right: var(--chat-toggle-width, 0);
+}
+.chat-header::after {
+  content: '';
+  width: var(--chat-toggle-width, 0);
+  flex-shrink: 0;
+}
+
+/* Collapse toggle — hide/show the spread sidebar */
+.chat-collapse-toggle {
+  --chat-toggle-size: 36px;
+  flex-shrink: 0;
+  width: var(--chat-toggle-size);
+  height: var(--chat-toggle-size);
+  border-radius: 8px;
+  border: 1px solid var(--border-md);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease), background var(--ease);
+}
+.chat-collapse-toggle:hover {
+  color: var(--purple);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+.chat-collapse-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.chat-collapse-label {
+  /* Hide label on desktop — icon-only button. Keep visible to screen readers. */
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.chat-collapse-icon {
+  /* Sidebar pictogram: tall rectangle with a filled column at one edge.
+     Filled column is on the LEFT by default (matches the sidebar position).
+     When expanded (chat fullscreen), flip to indicate "show spread". */
+  width: 18px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  position: relative;
+  transition: transform var(--ease);
+}
+.chat-collapse-icon::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 0;
+  width: 5px;
+  background: currentColor;
+  border-radius: 1.5px 0 0 1.5px;
+  transition: opacity var(--ease);
+}
+.chat-fullscreen .chat-collapse-icon::before {
+  opacity: 0.35;
+}
+
+/* Reserve space for the toggle so the title stays centered */
+.chat-root:has(.chat-collapse-toggle) {
+  --chat-toggle-width: 36px;
+}
 .chat-title {
   font-size: 1.4rem;
   font-weight: 700;
@@ -677,6 +774,13 @@ body.resizing * {
     grid-template-rows: minmax(0, 58dvh) minmax(0, 42dvh);
     height: 100vh;
     height: 100dvh;
+    transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  body.app-shell .layout.chat-fullscreen {
+    grid-template-rows: 0 minmax(0, 1fr);
+  }
+  body.app-shell .layout.chat-fullscreen .pane-sidebar {
+    visibility: hidden;
   }
   body.app-shell .resize-handle {
     display: none;
