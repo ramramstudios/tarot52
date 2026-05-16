@@ -26,6 +26,9 @@
   --ease:      0.2s ease;
 
   --mobile-safe-top: env(safe-area-inset-top);
+  --mobile-topbar-content-height: 44px;
+  --mobile-topbar-pad-x: 0.65rem;
+  --mobile-topbar-pad-bottom: 0.45rem;
 }
 
 /* ---- Reset ---- */
@@ -177,7 +180,8 @@ body.resizing * {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  min-height: 44px;
+  margin-bottom: 1rem;
 }
 .chat-header-text {
   flex: 1;
@@ -376,8 +380,8 @@ body.resizing * {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.15;
 }
-.chat-subtitle { color: var(--text-muted); font-size: 0.85rem; }
 
 .chat-thread {
   flex: 1;
@@ -927,9 +931,9 @@ body.resizing * {
     z-index: 4;
     grid-row: 1;
     gap: 0.5rem;
-    min-height: calc(52px + var(--mobile-safe-top));
+    min-height: calc(var(--mobile-topbar-content-height) + var(--mobile-safe-top) + var(--mobile-topbar-pad-bottom));
     margin: 0;
-    padding: calc(0.45rem + var(--mobile-safe-top)) 0.65rem 0.45rem;
+    padding: var(--mobile-safe-top) var(--mobile-topbar-pad-x) var(--mobile-topbar-pad-bottom);
     background: rgba(10, 10, 14, 0.94);
     border-bottom: 1px solid var(--border);
     -webkit-backdrop-filter: blur(10px);
@@ -937,14 +941,14 @@ body.resizing * {
   }
   body.app-shell .pane-sidebar .page-toolbar .nav-link {
     min-width: 44px;
-    min-height: 38px;
+    min-height: var(--mobile-topbar-content-height);
     justify-content: center;
     padding: 0 0.3rem;
   }
   body.app-shell .pane-sidebar .pane-toggle-spread {
     display: inline-flex;
     min-width: 44px;
-    min-height: 38px;
+    min-height: var(--mobile-topbar-content-height);
   }
   body.app-shell .pane-sidebar .draw-count {
     flex: 1;
@@ -965,7 +969,7 @@ body.resizing * {
   }
   body.app-shell .pane-sidebar .btn-compact {
     min-width: 44px;
-    min-height: 38px;
+    min-height: var(--mobile-topbar-content-height);
     padding: 7px 10px;
     white-space: nowrap;
   }
@@ -983,6 +987,7 @@ body.resizing * {
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 0.65rem 0.55rem 0.75rem;
+    margin-top: 0.65rem;
     margin-bottom: 0;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
@@ -1040,19 +1045,31 @@ body.resizing * {
     font-size: 0.86rem;
   }
   body.app-shell .chat-root {
-    padding: 0.55rem 0.85rem 0;
+    max-width: none;
+    padding: 0 0.85rem 0;
   }
   body.app-shell .chat-header {
-    margin-bottom: 0;
+    min-height: calc(var(--mobile-topbar-content-height) + var(--mobile-safe-top) + var(--mobile-topbar-pad-bottom));
+    margin: 0 -0.85rem;
+    padding: var(--mobile-safe-top) var(--mobile-topbar-pad-x) var(--mobile-topbar-pad-bottom);
+    background: rgba(19, 19, 24, 0.94);
+    border-bottom: 1px solid var(--border);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  body.app-shell .chat-header .pane-toggle,
+  body.app-shell .chat-new-btn {
+    min-width: 44px;
+    min-height: var(--mobile-topbar-content-height);
+  }
+  body.app-shell .chat-header + .chat-thread {
+    margin-top: 0.65rem;
   }
   body.app-shell .chat-title {
     font-size: 1.1rem;
   }
-  body.app-shell .chat-subtitle {
-    display: none;
-  }
   body.app-shell .chat-thread {
-    padding: 0.8rem 0;
+    padding: 0.8rem 0 0.65rem;
     gap: 0.6rem;
   }
   body.app-shell .chat-empty {
@@ -1098,7 +1115,8 @@ body.resizing * {
   }
   body.app-shell .pane-sidebar .page-toolbar {
     gap: 0.35rem;
-    padding-inline: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
   body.app-shell .pane-sidebar .draw-count-label {
     position: absolute;
