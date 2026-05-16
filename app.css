@@ -193,7 +193,7 @@ body.resizing * {
 }
 
 /* Collapse toggle — hide/show the spread sidebar */
-.chat-collapse-toggle {
+.pane-toggle {
   --chat-toggle-size: 36px;
   flex-shrink: 0;
   width: var(--chat-toggle-size);
@@ -208,11 +208,11 @@ body.resizing * {
   cursor: pointer;
   transition: color var(--ease), border-color var(--ease), background var(--ease);
 }
-.chat-collapse-toggle:hover {
+.pane-toggle:hover {
   color: var(--purple);
   border-color: rgba(139, 92, 246, 0.5);
 }
-.chat-collapse-toggle:focus-visible {
+.pane-toggle:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
@@ -226,29 +226,29 @@ body.resizing * {
   white-space: nowrap;
   border: 0;
 }
-.chat-collapse-icon {
-  /* Sidebar pictogram: tall rectangle with a filled column at one edge.
-     Filled column is on the LEFT by default (matches the sidebar position).
-     When expanded (chat fullscreen), flip to indicate "show spread". */
+.hamburger-icon {
   width: 18px;
-  height: 14px;
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
+  height: 12px;
   position: relative;
-  transition: transform var(--ease);
+  display: block;
 }
-.chat-collapse-icon::before {
+.hamburger-icon,
+.hamburger-icon::before,
+.hamburger-icon::after {
+  border-top: 2px solid currentColor;
+}
+.hamburger-icon::before,
+.hamburger-icon::after {
   content: '';
   position: absolute;
-  top: 0; bottom: 0;
   left: 0;
-  width: 5px;
-  background: currentColor;
-  border-radius: 1.5px 0 0 1.5px;
-  transition: opacity var(--ease);
+  width: 100%;
 }
-.chat-fullscreen .chat-collapse-icon::before {
-  opacity: 0.35;
+.hamburger-icon::before {
+  top: 5px;
+}
+.hamburger-icon::after {
+  top: 10px;
 }
 
 /* Reserve space for the toggle so the title stays centered */
@@ -576,6 +576,9 @@ body.resizing * {
   min-height: 44px;
   margin-bottom: 0.8rem;
 }
+.pane-toggle-spread {
+  display: none;
+}
 .draw-count {
   display: inline-flex;
   align-items: center;
@@ -771,7 +774,7 @@ body.resizing * {
   }
   body.app-shell .layout {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 58dvh) minmax(0, 42dvh);
+    grid-template-rows: minmax(0, 1fr) 0;
     height: 100vh;
     height: 100dvh;
     transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
@@ -780,6 +783,9 @@ body.resizing * {
     grid-template-rows: 0 minmax(0, 1fr);
   }
   body.app-shell .layout.chat-fullscreen .pane-sidebar {
+    visibility: hidden;
+  }
+  body.app-shell .layout:not(.chat-fullscreen) .pane-chat {
     visibility: hidden;
   }
   body.app-shell .resize-handle {
@@ -821,6 +827,11 @@ body.resizing * {
     min-height: 38px;
     justify-content: center;
     padding: 0 0.3rem;
+  }
+  body.app-shell .pane-sidebar .pane-toggle-spread {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 38px;
   }
   body.app-shell .pane-sidebar .draw-count {
     flex: 1;
@@ -963,7 +974,10 @@ body.resizing * {
 
 @media (max-width: 420px) {
   body.app-shell .layout {
-    grid-template-rows: minmax(0, 60dvh) minmax(0, 40dvh);
+    grid-template-rows: minmax(0, 1fr) 0;
+  }
+  body.app-shell .layout.chat-fullscreen {
+    grid-template-rows: 0 minmax(0, 1fr);
   }
   body.app-shell .pane-sidebar .page-toolbar {
     gap: 0.35rem;

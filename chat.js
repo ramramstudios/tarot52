@@ -32,23 +32,26 @@ function getFallbackMode() {
 
 const COLLAPSE_LS_KEY = 'tarot52.chatFullscreen';
 
-function applyCollapsedState(collapsed, toggleBtn) {
-  const layout = document.getElementById('layout');
-  if (layout) layout.classList.toggle('chat-fullscreen', collapsed);
-  if (toggleBtn) {
+function syncPaneToggleButtons(collapsed) {
+  document.querySelectorAll('[data-pane-toggle]').forEach((toggleBtn) => {
     toggleBtn.setAttribute('aria-pressed', String(collapsed));
     toggleBtn.setAttribute('aria-label', collapsed ? 'Show the spread' : 'Hide the spread and focus the chat');
     toggleBtn.setAttribute('title', collapsed ? 'Show spread' : 'Hide spread');
-    const label = toggleBtn.querySelector('.chat-collapse-label');
+    const label = toggleBtn.querySelector('.chat-collapse-label, .visually-hidden');
     if (label) label.textContent = collapsed ? 'Show spread' : 'Hide spread';
-  }
+  });
+}
+
+function applyCollapsedState(collapsed) {
+  const layout = document.getElementById('layout');
+  if (layout) layout.classList.toggle('chat-fullscreen', collapsed);
+  syncPaneToggleButtons(collapsed);
 }
 
 function bootChat(rootEl) {
   const thread     = rootEl.querySelector('#chatThread');
   const composer   = rootEl.querySelector('#chatComposer');
   const input      = rootEl.querySelector('#chatInput');
-  const toggleBtn  = rootEl.querySelector('#chatCollapseToggle');
 
   if (!thread || !composer || !input) {
     console.warn('[chat] missing expected elements in root');
@@ -56,16 +59,16 @@ function bootChat(rootEl) {
   }
 
   // Restore + wire the collapse toggle.
-  if (toggleBtn) {
-    const saved = localStorage.getItem(COLLAPSE_LS_KEY) === '1';
-    applyCollapsedState(saved, toggleBtn);
+  const saved = localStorage.getItem(COLLAPSE_LS_KEY) === '1';
+  applyCollapsedState(saved);
+  document.querySelectorAll('[data-pane-toggle]').forEach((toggleBtn) => {
     toggleBtn.addEventListener('click', () => {
       const layout = document.getElementById('layout');
       const next = !(layout && layout.classList.contains('chat-fullscreen'));
-      applyCollapsedState(next, toggleBtn);
+      applyCollapsedState(next);
       localStorage.setItem(COLLAPSE_LS_KEY, next ? '1' : '0');
     });
-  }
+  });
 
   const state = {
     mode: getFallbackMode(),
