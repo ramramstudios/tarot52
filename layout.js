@@ -101,15 +101,18 @@ async function init() {
   }
 
   // Boot each component now that markup is in the DOM.
+  // Spread first: this lays out the 52 cards while the sidebar is still
+  // visible/non-collapsed. bootChat then flips to chat-fullscreen, but the
+  // cards have real dimensions cached so they re-appear correctly on expand.
   const spreadRoot = sidebarSlot.querySelector('.sidebar-spread-root');
   const chatRoot   = chatSlot.querySelector('.chat-root');
-  if (chatRoot && window.bootChat) {
-    chatRoot.dataset.booted = '1';
-    window.bootChat(chatRoot);
-  }
   if (spreadRoot && window.bootSidebarSpread) {
     spreadRoot.dataset.booted = '1';
     window.bootSidebarSpread(spreadRoot);
+  }
+  if (chatRoot && window.bootChat) {
+    chatRoot.dataset.booted = '1';
+    window.bootChat(chatRoot);
   }
 
   initResize(layoutEl, handleEl);

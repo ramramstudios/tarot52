@@ -989,6 +989,10 @@ body.resizing * {
   }
   body.app-shell .pane-sidebar .card-3d {
     max-width: 58px;
+    /* Fallback so cards remain visible even if the grid column resolves to 0
+       briefly during collapse/expand transitions. */
+    min-width: 28px;
+    min-height: 40px;
   }
   body.app-shell .pane-sidebar .card-ornament {
     font-size: 1.15rem;

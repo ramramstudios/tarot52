@@ -58,7 +58,10 @@ function bootChat(rootEl) {
 
   // Always start collapsed (chat-fullscreen). The user opens the spread on demand
   // when the assistant prompts them to pick cards.
-  applyCollapsedState(true);
+  // Defer to next frame so the sidebar gets a chance to lay out its cards at
+  // their real size first — collapsing immediately while it's still visibility:hidden
+  // can leave the grid with 0-height cells on mobile.
+  requestAnimationFrame(() => applyCollapsedState(true));
   document.querySelectorAll('[data-pane-toggle]').forEach((toggleBtn) => {
     toggleBtn.addEventListener('click', () => {
       const layout = document.getElementById('layout');
