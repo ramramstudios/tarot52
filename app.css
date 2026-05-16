@@ -47,7 +47,7 @@ button { cursor: pointer; font-family: inherit; }
 #app { min-height: 100vh; }
 
 .page {
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2.5rem 1.25rem 5rem;
 }
@@ -74,14 +74,13 @@ button { cursor: pointer; font-family: inherit; }
    TAROT 52
    ============================================================ */
 
-/* Spread container — cosmic feel */
+/* Spread container — 4x13 grid of full deck */
 .tarot-spread {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 0.6rem;
+  justify-items: center;
   padding: 2rem 1.5rem 2.5rem;
-  flex-wrap: wrap;
   background: radial-gradient(ellipse at 50% 80%, #1a0a38 0%, #0c0810 55%, transparent 100%);
   border-radius: var(--radius);
   border: 1px solid rgba(139, 92, 246, 0.12);
@@ -91,10 +90,10 @@ button { cursor: pointer; font-family: inherit; }
 /* 3-D card shell */
 .card-3d {
   perspective: 900px;
-  width: 95px;
-  height: 133px; /* 5:7 poker ratio (2.5" x 3.5") */
+  width: 100%;
+  max-width: 85px;
+  aspect-ratio: 5 / 7; /* 5:7 poker ratio (2.5" x 3.5") */
   cursor: pointer;
-  flex-shrink: 0;
   transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-inner {
@@ -214,15 +213,6 @@ button { cursor: pointer; font-family: inherit; }
   margin-bottom: 2.5rem;
 }
 
-.tarot-image {
-  width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  opacity: 0.85;
-}
-
 /* ============================================================
    BUTTONS
    ============================================================ */
@@ -247,13 +237,18 @@ button { cursor: pointer; font-family: inherit; }
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+@media (max-width: 900px) {
+  .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.5rem; padding: 1.25rem 0.75rem 1.75rem; }
+}
 @media (max-width: 640px) {
-  .card-3d { width: 70px; height: 98px; } /* 5:7 poker ratio */
-  .card-ornament    { font-size: 1.5rem; }
-  .card-center-suit { font-size: 1.4rem; }
-  .rank-label { font-size: 0.58rem; }
-  .suit-label { font-size: 0.54rem; }
-  .tarot-spread { gap: 0.45rem; padding: 1.25rem 0.75rem 1.75rem; }
+  .tarot-spread { grid-template-columns: repeat(7, 1fr); gap: 0.35rem; padding: 0.75rem 0.5rem 1rem; }
+  .card-ornament    { font-size: 1.2rem; }
+  .card-center-suit { font-size: 1.2rem; }
+  .rank-label { font-size: 0.5rem; }
+  .suit-label { font-size: 0.5rem; }
+}
+@media (max-width: 420px) {
+  .tarot-spread { grid-template-columns: repeat(6, 1fr); }
 }
 
 /* ============================================================

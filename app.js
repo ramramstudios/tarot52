@@ -85,18 +85,14 @@ function buildCard3D(rankIdx, suitIdx) {
   return wrapper;
 }
 
-/** Wire the 5-card spread interaction */
+/** Wire the full 52-card spread interaction */
 function initTarotSpread(spreadEl, readingEl) {
-  const deck = shuffleDeck();
-  const hand = deck.slice(0, 5);
-  const ROTATE = [-6, -3, 0, 3, 6];
+  const hand = shuffleDeck();
 
   spreadEl.innerHTML = '';
 
-  hand.forEach(({ r, s }, i) => {
+  hand.forEach(({ r, s }) => {
     const card = buildCard3D(r, s);
-    card.style.transform = `rotate(${ROTATE[i]}deg)`;
-    card.style.setProperty('--rot', `${ROTATE[i]}deg`);
 
     const flip = () => {
       if (card.classList.contains('flipped')) return;
@@ -104,7 +100,6 @@ function initTarotSpread(spreadEl, readingEl) {
       if (isAnyFlipped) return;
 
       card.classList.add('flipped', 'selected');
-      card.style.transform = 'translateY(-8px) scale(1.08)';
       card.setAttribute('aria-label', `${RANKS[r]} of ${SUITS[s].name}`);
 
       spreadEl.querySelectorAll('.card-3d').forEach(c => {
@@ -149,8 +144,6 @@ function renderTarot() {
     <div class="tarot-controls">
       <button class="btn-primary" id="newReadingBtn">New Spread</button>
     </div>
-
-    <img class="tarot-image" src="tarot52.png" alt="Tarot 52" loading="lazy" />
   `;
 
   const spreadEl  = el.querySelector('#tarotSpread');
