@@ -1,0 +1,264 @@
+/* ===================================================
+   app.css — Tarot 52 (single page app)
+   =================================================== */
+
+/* ---- Variables ---- */
+:root {
+  --bg:          #0a0a0e;
+  --surface:     #131318;
+  --surface-2:   #1b1b23;
+  --border:      rgba(255, 255, 255, 0.06);
+  --border-md:   rgba(255, 255, 255, 0.11);
+  --text:        #e2e2ea;
+  --text-muted:  #6c7280;
+  --text-dim:    #3a3a46;
+
+  --purple:      #8b5cf6;
+  --purple-h:    #7c3aed;
+  --purple-glow: rgba(139, 92, 246, 0.22);
+
+  --focus-ring:  0 0 0 3px rgba(82, 144, 245, 0.38);
+  --shadow-sm:   0 1px 4px rgba(0, 0, 0, 0.55);
+  --shadow-md:   0 4px 20px rgba(0, 0, 0, 0.60);
+
+  --radius:    10px;
+  --radius-sm: 7px;
+  --ease:      0.2s ease;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+img { max-width: 100%; display: block; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ============================================================
+   PAGE BASE
+   ============================================================ */
+#app { min-height: 100vh; }
+
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.page-header {
+  margin-bottom: 2.25rem;
+  text-align: center;
+}
+.page-header h1 {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.4rem;
+  background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 50%, #d8b4fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* ============================================================
+   TAROT 52
+   ============================================================ */
+
+/* Spread container — cosmic feel */
+.tarot-spread {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.9rem;
+  padding: 2rem 1.5rem 2.5rem;
+  flex-wrap: wrap;
+  background: radial-gradient(ellipse at 50% 80%, #1a0a38 0%, #0c0810 55%, transparent 100%);
+  border-radius: var(--radius);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  margin-bottom: 1.25rem;
+}
+
+/* 3-D card shell */
+.card-3d {
+  perspective: 900px;
+  width: 95px;
+  height: 133px; /* 5:7 poker ratio (2.5" x 3.5") */
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--radius-sm);
+}
+.card-3d.flipped .card-inner { transform: rotateY(180deg); }
+
+/* Hover: lift unflipped cards */
+.card-3d:not(.flipped):not(.dimmed):hover .card-inner {
+  transform: translateY(-12px) scale(1.05);
+  transition: transform 0.15s ease;
+}
+.card-3d:not(.flipped):not(.dimmed):hover {
+  filter: drop-shadow(0 0 14px rgba(139, 92, 246, 0.45));
+}
+
+/* Selected: lift higher (2D transform on wrapper avoids 3D foreshortening) */
+.card-3d.selected { z-index: 2; }
+
+/* Dim non-selected after a card is chosen */
+.card-3d.dimmed { opacity: 0.28; filter: saturate(0.2); transition: opacity 0.35s, filter 0.35s; }
+
+/* Shared face */
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* BACK — deep purple */
+.card-back-face {
+  background: radial-gradient(ellipse at 40% 35%, #2a0d5e 0%, #0d0618 100%);
+  border: 1.5px solid rgba(180, 130, 255, 0.22);
+  box-shadow: inset 0 0 20px rgba(120, 60, 220, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateZ(1px); /* Firefox: separate planes so backface-visibility culls correctly */
+}
+.card-back-face::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(180, 130, 255, 0.14);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.card-ornament {
+  font-size: 2rem;
+  color: rgba(200, 160, 255, 0.6);
+  text-shadow: 0 0 20px rgba(160, 100, 255, 0.5), 0 0 50px rgba(100, 40, 200, 0.25);
+  user-select: none;
+  position: relative;
+  z-index: 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* FRONT — classic ivory card */
+.card-front-face {
+  transform: rotateY(180deg) translateZ(1px); /* translateZ separates from back face in Firefox */
+  background: #f5f0e8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+.card-corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+.card-corner.tl { top: 5px;    left: 6px; }
+.card-corner.br { bottom: 5px; right: 6px; transform: rotate(180deg); }
+.rank-label { font-size: 0.75rem; font-weight: 800; }
+.suit-label  { font-size: 0.7rem;  line-height: 1; }
+.card-center-suit { font-size: 2.2rem; }
+
+.card-front-face.suit-red   { color: #b91c1c; }
+.card-front-face.suit-black { color: #1c1c1e; }
+
+/* Reading panel */
+.tarot-reading {
+  background: linear-gradient(160deg, #1a0e30 0%, #131018 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  text-align: center;
+  margin: 0 0 1.5rem;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: background 0.4s ease;
+}
+.reading-prompt     { color: var(--text-dim); font-size: 0.88rem; font-style: italic; }
+.reading-suit-icon  { font-size: 2rem; line-height: 1; }
+.reading-card-name  { font-size: 1.5rem; font-weight: 700; color: #e2d9f3; letter-spacing: -0.01em; }
+.reading-meaning    { font-size: 1rem; font-weight: 500; color: var(--purple); margin-top: 0.15rem; }
+
+.tarot-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.tarot-image {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  opacity: 0.85;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-primary {
+  display: inline-block;
+  padding: 10px 24px;
+  background-color: var(--purple-h);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--ease), box-shadow var(--ease), transform 0.06s ease;
+  box-shadow: var(--shadow-sm);
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover  { filter: brightness(1.15); box-shadow: var(--shadow-md); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .card-3d { width: 70px; height: 98px; } /* 5:7 poker ratio */
+  .card-ornament    { font-size: 1.5rem; }
+  .card-center-suit { font-size: 1.4rem; }
+  .rank-label { font-size: 0.58rem; }
+  .suit-label { font-size: 0.54rem; }
+  .tarot-spread { gap: 0.45rem; padding: 1.25rem 0.75rem 1.75rem; }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
