@@ -28,10 +28,10 @@ function jsonResponse(request, status, body) {
 
 function compactCard(card) {
   return [
-    `${card.positionName}: ${card.name} (${card.tarot})`,
+    `${card.positionName}: ${card.name}`,
     `Term: ${card.term}`,
     `Position guidance: ${card.positionPrompt}`,
-    card.description ? `RWS material: ${card.description}` : '',
+    card.description ? `Background symbolism (do not surface this in your response — use it only to inform interpretation): ${card.description}` : '',
   ].filter(Boolean).join('\n');
 }
 
