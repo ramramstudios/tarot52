@@ -149,7 +149,7 @@ function bootChat(rootEl) {
     const positions = mode.positions.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
     appendMessage(
       'assistant',
-      `${prefix} ${mode.count}-card ${mode.label} mode.\n\n${mode.intro}\n\n${positions}\n\nMeditate on your inquiry, type it below, then open the spread (the ☰ icon, top-left) and draw ${mode.count === 1 ? 'your card' : `${mode.count} cards`}.`
+      `${prefix} ${mode.count}-card ${mode.label} mode.\n\n${mode.intro}\n\n${positions}\n\nMeditate on your question, then type it below. Once you send it, the spread will open so you can draw ${mode.count === 1 ? 'your card' : `${mode.count} cards`}.`
     );
   };
 
@@ -163,14 +163,14 @@ function bootChat(rootEl) {
 
     if (reason === 'initial') {
       appendMessage('assistant', 'Welcome to Tarot Chat.');
-      describeMode('I see you have selected');
+      describeMode('You chose');
       return;
     }
     if (reason === 'newspread') {
       describeMode('New spread ready. You are in');
       return;
     }
-    describeMode("Ah, you've chosen");
+    describeMode("You've chosen");
   };
 
   const enrichCards = (cards) => {
@@ -251,6 +251,8 @@ function bootChat(rootEl) {
         appendMessage('assistant', 'Note: lore.json could not be loaded, so this mock used only the card headline data.', 'meta');
       }
     }
+    // Reading is complete — collapse the spread so the user focuses on the response.
+    applyCollapsedState(true);
   };
 
   const answerFollowUp = async (text) => {
@@ -295,8 +297,10 @@ function bootChat(rootEl) {
       }));
       appendMessage(
         'assistant',
-        `Now open the spread (☰ top-left) and select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`}. I will read them in draw order for ${state.mode.label}.`
+        `Opening the spread. Select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`} and I will read them in draw order for ${state.mode.label}.`
       );
+      // Auto-expand the spread sidebar so the user can immediately pick cards.
+      applyCollapsedState(false);
       return;
     }
 
@@ -317,12 +321,19 @@ function bootChat(rootEl) {
     }
   });
 
-  // ---- "New chat" modal ------------------------------------------------
-  const newBtn       = rootEl.querySelector('#chatNewBtn');
+  // ---- Mode-selection modal (welcome + new chat) -----------------------
+  // One modal serves two purposes:
+  //   'welcome' - mandatory mode pick on first load. No cancel/escape/backdrop dismiss.
+  //   'new'     - mid-session reset. Dismissible.
+  const newBtn        = rootEl.querySelector('#chatNewBtn');
   const modalBackdrop = rootEl.querySelector('#newChatModalBackdrop');
+  const modalTitle    = rootEl.querySelector('#newChatModalTitle');
+  const modalDesc     = rootEl.querySelector('#newChatModalDesc');
   const modalSelect   = rootEl.querySelector('#newChatModeSelect');
   const modalCancel   = rootEl.querySelector('#newChatCancelBtn');
   const modalStart    = rootEl.querySelector('#newChatStartBtn');
+
+  let modalPurpose = null; // 'welcome' | 'new' | null
 
   const populateModeOptions = () => {
     if (!modalSelect) return;
@@ -337,13 +348,30 @@ function bootChat(rootEl) {
   };
   populateModeOptions();
 
+  const configureModalFor = (purpose) => {
+    if (!modalTitle || !modalDesc || !modalCancel || !modalStart) return;
+    if (purpose === 'welcome') {
+      modalTitle.textContent = 'Welcome to Tarot 52';
+      modalDesc.textContent = 'Choose a reading mode to begin. Each mode shapes how the cards will be interpreted against your question.';
+      modalCancel.hidden = true;
+      modalStart.textContent = 'Begin';
+    } else {
+      modalTitle.textContent = 'Start a new chat?';
+      modalDesc.textContent = 'This will clear the current thread and shuffle a new deck.';
+      modalCancel.hidden = false;
+      modalStart.textContent = 'Start';
+    }
+  };
+
   let lastFocusedBeforeModal = null;
-  const openModal = () => {
+  const openModal = (purpose = 'new') => {
     if (!modalBackdrop) return;
+    modalPurpose = purpose;
+    configureModalFor(purpose);
     populateModeOptions(); // refresh in case modes are added at runtime
-    // Default the dropdown to the currently active mode.
-    if (modalSelect && state.mode) {
-      modalSelect.value = String(state.mode.count);
+    // Default the dropdown to the currently active mode (or Mode 1 on welcome).
+    if (modalSelect) {
+      modalSelect.value = String(state.mode?.count || 1);
     }
     lastFocusedBeforeModal = document.activeElement;
     modalBackdrop.hidden = false;
@@ -356,6 +384,7 @@ function bootChat(rootEl) {
     if (!modalBackdrop) return;
     modalBackdrop.classList.remove('is-open');
     modalBackdrop.hidden = true;
+    modalPurpose = null;
     if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === 'function') {
       lastFocusedBeforeModal.focus();
     }
@@ -375,35 +404,61 @@ function bootChat(rootEl) {
     autoGrow();
   };
 
-  if (newBtn) newBtn.addEventListener('click', openModal);
-  if (modalCancel) modalCancel.addEventListener('click', closeModal);
+  if (newBtn) newBtn.addEventListener('click', () => openModal('new'));
+  if (modalCancel) {
+    modalCancel.addEventListener('click', () => {
+      // Cancel only valid for the 'new' purpose. Welcome modal hides this button.
+      if (modalPurpose === 'new') closeModal();
+    });
+  }
   if (modalBackdrop) {
     modalBackdrop.addEventListener('click', (e) => {
-      if (e.target === modalBackdrop) closeModal();
+      // Welcome modal cannot be dismissed by clicking the backdrop.
+      if (e.target === modalBackdrop && modalPurpose === 'new') closeModal();
     });
   }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalBackdrop && !modalBackdrop.hidden) closeModal();
+    // Welcome modal cannot be dismissed with Escape.
+    if (e.key === 'Escape' && modalBackdrop && !modalBackdrop.hidden && modalPurpose === 'new') {
+      closeModal();
+    }
   });
   if (modalStart) {
     modalStart.addEventListener('click', () => {
       const count = parseInt(modalSelect?.value || '1', 10);
+      const wasWelcome = modalPurpose === 'welcome';
       closeModal();
       resetChatThread();
       // Always collapse chat back to fullscreen so the user starts focused on the chat.
       applyCollapsedState(true);
-      // Tell the spread to reshuffle into the new mode. It will fire a
-      // modechange event back, which our existing listener turns into the
-      // greeting + describeMode message.
+      // Welcome: trigger the same greeting as the original 'initial' boot.
+      // New chat mid-session: post the 'New spread ready' message.
       window.dispatchEvent(new CustomEvent('tarot52:newsession', {
-        detail: { count, reason: 'newspread' },
+        detail: { count, reason: wasWelcome ? 'initial' : 'newspread' },
       }));
     });
   }
 
+  // First modechange from boot is consumed silently — the welcome modal
+  // owns the greeting. After the user picks a mode, tarot52:newsession
+  // dispatches a fresh modechange with the proper reason.
+  let suppressNextModechange = true;
   window.addEventListener('tarot52:modechange', (e) => {
+    if (suppressNextModechange) {
+      suppressNextModechange = false;
+      // Still capture the default mode in state so the welcome modal can
+      // preselect something sensible, but do not post any messages.
+      state.mode = e.detail.mode || getFallbackMode();
+      setPlaceholder();
+      return;
+    }
     resetForMode(e.detail.mode, e.detail.reason);
   });
+
+  // Open the welcome modal once the spread has had a chance to dispatch its
+  // initial modechange (which we swallow). Defer to next frame so order is
+  // deterministic across browsers.
+  requestAnimationFrame(() => openModal('welcome'));
 
   window.addEventListener('tarot52:drawblocked', () => {
     if (!state.inquiry) {
