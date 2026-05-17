@@ -200,20 +200,21 @@ function bootChat(rootEl) {
   };
 
   const renderMockReading = (payload) => {
-    // Conversational prose fallback for when the live API is not available.
-    // Mirrors the style guide so the UX feels consistent even offline.
+    // Conversational prose fallback for when the live API is unreachable.
+    // Voice mirrors the system prompts so the UX stays consistent offline.
     const paragraphs = [];
-    paragraphs.push(`On your question — "${payload.userPrompt}" — the cards offer this lens.`);
+    const modeLabel = payload.mode?.label || 'reading';
+    paragraphs.push(`On your question — "${payload.userPrompt}" — here is a ${modeLabel.toLowerCase()} take.`);
 
     payload.cards.forEach((card) => {
       const loreLine = firstSentence(card.description);
       const opener = payload.cards.length > 1
-        ? `For ${card.positionName.toLowerCase()}, you drew the ${card.name} — in tarot, the ${card.tarot}. The headline is ${card.term.toLowerCase()}.`
-        : `You drew the ${card.name} — in tarot, the ${card.tarot}. The headline is ${card.term.toLowerCase()}.`;
+        ? `For ${card.positionName.toLowerCase()}, you drew the ${card.name}, the ${card.tarot} in the Rider-Waite deck. The headline is ${card.term.toLowerCase()}.`
+        : `You drew the ${card.name}, the ${card.tarot} in the Rider-Waite deck. The headline is ${card.term.toLowerCase()}.`;
       paragraphs.push(loreLine ? `${opener} ${loreLine}` : opener);
     });
 
-    paragraphs.push('This is a local placeholder reading while the live model is unavailable. Once the API is reachable, the reading will weave these card images more deeply against the specifics of your question.');
+    paragraphs.push('This is a local placeholder while the live model is unavailable. With the API reachable, the reading would weave these images more closely against the specifics of your question and the structure of the mode you chose.');
     return paragraphs.join('\n\n');
   };
 
