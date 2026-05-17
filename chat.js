@@ -87,6 +87,20 @@ function getFallbackMode() {
   };
 }
 
+const FOLLOW_UP_SYSTEM_PROMPT = [
+  'Conversation phase: follow-up. The initial reading has already been delivered to the querent.',
+  'This instruction supersedes the mode-specific "How to construct the reading" opening instructions for this turn.',
+  'Answer the querent\'s latest follow-up directly as a continuation of the existing conversation.',
+  'Do not begin by re-announcing the drawn card, restating the spread, restating position mappings, or repeating the card\'s one-word term as if this were a new reading.',
+  'Use the original card draw as shared context. Refer to a card, position, or term only when it genuinely helps answer the follow-up.',
+  'If the querent asks for a recap, alternative interpretation, or a closer look at a specific card, then revisit only the requested part instead of replaying the whole opening reading.',
+].join(' ');
+
+function buildSystemPromptForPhase(mode, phase) {
+  if (phase !== 'followup') return mode.systemPrompt;
+  return `${mode.systemPrompt}\n\n${FOLLOW_UP_SYSTEM_PROMPT}`;
+}
+
 function syncPaneToggleButtons(collapsed) {
   document.querySelectorAll('[data-pane-toggle]').forEach((toggleBtn) => {
     toggleBtn.setAttribute('aria-pressed', String(collapsed));
@@ -145,6 +159,7 @@ function bootChat(rootEl) {
     readingComplete: false,
     loreIndex: null,
     loreError: null,
+    initialReading: '',
     followUps: [],
   };
 
@@ -200,6 +215,7 @@ function bootChat(rootEl) {
     state.inquiry = '';
     state.cards = [];
     state.readingComplete = false;
+    state.initialReading = '';
     state.followUps = [];
     setPlaceholder();
 
@@ -226,10 +242,11 @@ function bootChat(rootEl) {
     });
   };
 
-  const createLLMPayload = () => {
+  const createLLMPayload = (phase = 'initial') => {
     const cards = enrichCards(state.cards);
     return {
-      systemPrompt: state.mode.systemPrompt,
+      phase,
+      systemPrompt: buildSystemPromptForPhase(state.mode, phase),
       mode: {
         count: state.mode.count,
         label: state.mode.label,
@@ -237,6 +254,7 @@ function bootChat(rootEl) {
       },
       userPrompt: state.inquiry,
       cards,
+      initialReading: phase === 'followup' ? state.initialReading : '',
       followUps: state.followUps.slice(),
     };
   };
@@ -303,16 +321,20 @@ function bootChat(rootEl) {
   };
 
   const answerCompletedReading = async () => {
-    const payload = createLLMPayload();
+    const payload = createLLMPayload('initial');
     window.Tarot52LastLLMPayload = payload;
     const pending = appendMessage('assistant', 'Reading the spread...', 'meta');
     try {
       const text = await requestChatCompletion(payload);
       pending.remove();
-      appendMessage('assistant', stripMarkdown(text) || renderMockReading(payload));
+      const reading = stripMarkdown(text) || renderMockReading(payload);
+      state.initialReading = reading;
+      appendMessage('assistant', reading);
     } catch (err) {
       pending.remove();
-      appendMessage('assistant', renderMockReading(payload));
+      const reading = renderMockReading(payload);
+      state.initialReading = reading;
+      appendMessage('assistant', reading);
       appendMessage(
         'assistant',
         `Live AI is not available yet, so I used the local mock reading. ${err.message}`,
@@ -328,20 +350,21 @@ function bootChat(rootEl) {
 
   const answerFollowUp = async (text) => {
     state.followUps.push({ role: 'user', content: text });
-    const payload = createLLMPayload();
+    const payload = createLLMPayload('followup');
     window.Tarot52LastLLMPayload = payload;
     const pending = appendMessage('assistant', 'Reading your follow-up...', 'meta');
     try {
       const reply = await requestChatCompletion(payload);
       pending.remove();
-      appendMessage('assistant', stripMarkdown(reply));
+      const cleanReply = stripMarkdown(reply);
+      appendMessage('assistant', cleanReply);
+      state.followUps.push({ role: 'assistant', content: cleanReply });
     } catch (err) {
       pending.remove();
       const cardTerms = state.cards.map((card) => `${card.positionName}: ${card.term}`).join('; ');
-      appendMessage(
-        'assistant',
-        `Mock follow-up noted. I would keep reading through ${cardTerms}. With the LLM connected, this is where the answer would get more specific to your added context while staying inside the ${state.mode.label} frame.`
-      );
+      const fallbackReply = `Mock follow-up noted. I would keep reading through ${cardTerms}. With the LLM connected, this is where the answer would get more specific to your added context while staying inside the ${state.mode.label} frame.`;
+      appendMessage('assistant', fallbackReply);
+      state.followUps.push({ role: 'assistant', content: fallbackReply });
       appendMessage('assistant', `Live AI is not available yet. ${err.message}`, 'meta');
     }
   };
@@ -467,6 +490,7 @@ function bootChat(rootEl) {
     state.inquiry = '';
     state.cards = [];
     state.readingComplete = false;
+    state.initialReading = '';
     state.followUps = [];
     input.value = '';
     autoGrow();

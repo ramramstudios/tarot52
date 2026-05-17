@@ -129,7 +129,7 @@ More modes (5, 8, …) can be added to `READING_MODES` in `app.js`. The Fibonacc
 2. **Inquiry.** The user types their question in the chat. The chat acknowledges and re-prompts the user to open the spread and pick the right number of cards.
 3. **Draw.** The user clicks the ☰ in the chat header to show the spread, then flips cards one at a time. Each flip emits a meta message into the chat (`Past: 3 of Hearts - Collaboration`). The spread enforces the mode's card limit.
 4. **Reading.** When the last required card flips, the chat sends a payload (system prompt + inquiry + cards with positions, terms, and full RWS descriptions from `lore.json`) to `/api/chat` and renders the response. If the API is unavailable, it falls back to the mock response.
-5. **Follow-up.** The user can keep chatting in the same thread. Follow-up messages are appended to `state.followUps` and would be sent to the LLM with the same system prompt and card payload, plus the running thread, for increasingly specific readings.
+5. **Follow-up.** The user can keep chatting in the same thread. Follow-up messages are appended to `state.followUps` and sent with a follow-up phase prompt, the original card payload, and the already delivered opening reading. Follow-up turns answer the latest message directly instead of replaying the initial card announcement.
 6. **New thread.** Clicking the **"New"** button in the chat header opens a confirmation modal with a mode dropdown. Selecting a mode and clicking "Start" clears the chat, reshuffles the deck into the new mode, and returns the user to chat-fullscreen. There is no way to change mode mid-thread.
 
 ### Example payload (3-card reading)
@@ -142,6 +142,7 @@ Payload sent to the LLM:
 
 ```json
 {
+  "phase": "initial",
   "systemPrompt": "You are Tarot 52, a reflective tarot-reading assistant. The querent selected a Past / Present / Future reading. Interpret card one as Past, card two as Present, and card three as Future…",
   "mode": {
     "count": 3,
@@ -158,6 +159,7 @@ Payload sent to the LLM:
     { "name": "3 of Spades",   "term": "Heartbreak","positionName": "Present", "tarot": "Three of Swords", "description": "..." },
     { "name": "4 of Spades",   "term": "Rest",      "positionName": "Future",  "tarot": "Four of Swords", "description": "..." }
   ],
+  "initialReading": "",
   "followUps": []
 }
 ```

@@ -38,8 +38,11 @@ function compactCard(card) {
 function buildInput(payload) {
   const cards = Array.isArray(payload.cards) ? payload.cards : [];
   const followUps = Array.isArray(payload.followUps) ? payload.followUps : [];
+  const phase = payload.phase === 'followup' ? 'follow-up' : 'initial reading';
 
   return [
+    `Conversation phase: ${phase}`,
+    '',
     `Querent inquiry:\n${payload.userPrompt || ''}`,
     '',
     `Reading mode: ${payload.mode?.label || 'General Insight'}`,
@@ -47,8 +50,12 @@ function buildInput(payload) {
     'Cards drawn in order:',
     cards.map(compactCard).join('\n\n'),
     '',
+    payload.initialReading
+      ? `Initial assistant reading already delivered:\n${payload.initialReading}`
+      : '',
+    '',
     followUps.length
-      ? `Follow-up context:\n${followUps.map((item) => `${item.role}: ${item.content}`).join('\n')}`
+      ? `Conversation since the initial reading:\n${followUps.map((item) => `${item.role}: ${item.content}`).join('\n')}`
       : '',
   ].filter(Boolean).join('\n');
 }
