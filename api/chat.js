@@ -1,25 +1,29 @@
 const DEFAULT_MODEL = 'gpt-5-mini';
 
-function setCors(req, res) {
-  const origin = req.headers.origin || '';
+function corsHeaders(request) {
+  const origin = request.headers.get('origin') || '';
   const allowed = (process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
+  const allowOrigin = allowed.length === 0 || allowed.includes(origin)
+    ? origin || '*'
+    : 'null';
 
-  if (allowed.length === 0 || allowed.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  }
-
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Vary': 'Origin',
+  };
 }
 
-function sendJson(res, status, body) {
-  res.statusCode = status;
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.end(JSON.stringify(body));
+function jsonResponse(request, status, body) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: corsHeaders(request),
+  });
 }
 
 function compactCard(card) {
@@ -49,29 +53,31 @@ function buildInput(payload) {
   ].filter(Boolean).join('\n');
 }
 
-module.exports = async function handler(req, res) {
-  setCors(req, res);
+export async function OPTIONS(request) {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders(request),
+  });
+}
 
-  if (req.method === 'OPTIONS') {
-    res.statusCode = 204;
-    res.end();
-    return;
-  }
+export async function GET(request) {
+  return jsonResponse(request, 405, { error: 'Method not allowed' });
+}
 
-  if (req.method !== 'POST') {
-    sendJson(res, 405, { error: 'Method not allowed' });
-    return;
-  }
-
+export async function POST(request) {
   if (!process.env.OPENAI_API_KEY) {
-    sendJson(res, 500, { error: 'OPENAI_API_KEY is not configured' });
-    return;
+    return jsonResponse(request, 500, { error: 'OPENAI_API_KEY is not configured' });
   }
 
-  const payload = req.body || {};
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse(request, 400, { error: 'Invalid JSON body' });
+  }
+
   if (!payload.userPrompt || !Array.isArray(payload.cards) || payload.cards.length === 0) {
-    sendJson(res, 400, { error: 'Missing userPrompt or cards' });
-    return;
+    return jsonResponse(request, 400, { error: 'Missing userPrompt or cards' });
   }
 
   const instructions = [
@@ -99,20 +105,19 @@ module.exports = async function handler(req, res) {
 
     const data = await response.json();
     if (!response.ok) {
-      sendJson(res, response.status, {
+      return jsonResponse(request, response.status, {
         error: data.error?.message || 'OpenAI request failed',
       });
-      return;
     }
 
-    sendJson(res, 200, {
+    return jsonResponse(request, 200, {
       text: data.output_text || '',
       model: data.model,
       responseId: data.id,
     });
   } catch (err) {
-    sendJson(res, 500, {
+    return jsonResponse(request, 500, {
       error: err instanceof Error ? err.message : 'Unexpected server error',
     });
   }
-};
+}
