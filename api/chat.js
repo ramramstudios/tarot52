@@ -112,7 +112,10 @@ export async function POST(request) {
   // frontend forgot to send one. Do NOT add tone/format rules here.
   const instructions = payload.systemPrompt
     ? payload.systemPrompt
-    : 'You are Tarot 52, a reflective tarot reading assistant. Use the cards as symbolic prompts, not as fixed predictions.';
+    : [
+      'You are Tarot 52, a reflective tarot reading assistant. Use the cards as symbolic prompts, not as fixed predictions.',
+      'Write in connected prose with genuine warmth, directness, and clean rhythm. Lead with the useful insight, avoid hollow preambles, avoid markdown, avoid bullets unless the content is genuinely enumerable, and make every sentence earn its place.',
+    ].join(' ');
 
   try {
     const response = await fetch('https://api.openai.com/v1/responses', {
