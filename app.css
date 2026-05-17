@@ -352,25 +352,12 @@ body.resizing * {
 }
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
+  justify-content: stretch;
 }
-
-/* Generic secondary button (used in the modal) */
-.btn-secondary {
-  display: inline-block;
-  padding: 9px 18px;
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border-md);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color var(--ease), border-color var(--ease), background var(--ease);
+.modal-actions .btn-primary {
+  flex: 1;
+  min-height: 42px;
 }
-.btn-secondary:hover  { color: var(--purple); border-color: rgba(139, 92, 246, 0.5); }
-.btn-secondary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 .chat-title {
   font-size: 1.4rem;

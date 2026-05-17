@@ -330,7 +330,6 @@ function bootChat(rootEl) {
   const modalTitle    = rootEl.querySelector('#newChatModalTitle');
   const modalDesc     = rootEl.querySelector('#newChatModalDesc');
   const modalSelect   = rootEl.querySelector('#newChatModeSelect');
-  const modalCancel   = rootEl.querySelector('#newChatCancelBtn');
   const modalStart    = rootEl.querySelector('#newChatStartBtn');
 
   let modalPurpose = null; // 'welcome' | 'new' | null
@@ -349,16 +348,14 @@ function bootChat(rootEl) {
   populateModeOptions();
 
   const configureModalFor = (purpose) => {
-    if (!modalTitle || !modalDesc || !modalCancel || !modalStart) return;
+    if (!modalTitle || !modalDesc || !modalStart) return;
     if (purpose === 'welcome') {
       modalTitle.textContent = 'Welcome to Tarot 52';
       modalDesc.textContent = 'Choose a reading mode to begin. Each mode shapes how the cards will be interpreted against your question.';
-      modalCancel.hidden = true;
       modalStart.textContent = 'Begin';
     } else {
       modalTitle.textContent = 'Start a new chat?';
-      modalDesc.textContent = 'This will clear the current thread and shuffle a new deck.';
-      modalCancel.hidden = false;
+      modalDesc.textContent = 'Choose the mode for the next reading. Starting will clear the current thread and shuffle a new deck.';
       modalStart.textContent = 'Start';
     }
   };
@@ -405,12 +402,6 @@ function bootChat(rootEl) {
   };
 
   if (newBtn) newBtn.addEventListener('click', () => openModal('new'));
-  if (modalCancel) {
-    modalCancel.addEventListener('click', () => {
-      // Cancel only valid for the 'new' purpose. Welcome modal hides this button.
-      if (modalPurpose === 'new') closeModal();
-    });
-  }
   if (modalBackdrop) {
     modalBackdrop.addEventListener('click', (e) => {
       // Welcome modal cannot be dismissed by clicking the backdrop.
