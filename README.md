@@ -68,6 +68,7 @@ The [`lore.json`](lore.json) data is structured to feed that prompt directly —
 | `app.js`          | Spread page logic (shuffle, flip, draw limits, UI)   |
 | `lore.js`         | Lore page renderer (loads `lore.json`)               |
 | `app.css`         | All styles, shared across both pages                 |
+| `api/chat.js`     | Vercel API endpoint that calls OpenAI                |
 | `lore.json`       | The 52-card mapping data (terms + RWS descriptions)  |
 | `tarot52.png`     | App icon / logo asset                                |
 
@@ -80,6 +81,27 @@ python3 -m http.server 8000
 ```
 
 Then open `http://localhost:8000`.
+
+The static server does not run the Vercel API function, so local readings fall back to the mock response unless you run the project through Vercel's local dev server.
+
+## OpenAI API setup
+
+The chat calls the Vercel serverless endpoint at `/api/chat`. That endpoint uses the OpenAI Responses API and reads secrets from Vercel environment variables.
+
+Required in Vercel:
+
+```txt
+OPENAI_API_KEY=your OpenAI platform API key
+```
+
+Optional:
+
+```txt
+OPENAI_MODEL=gpt-5-mini
+ALLOWED_ORIGINS=https://your-domain.example,https://ramramstudios.github.io
+```
+
+If `/api/chat` is unavailable or the key is missing, the frontend keeps working and renders the local mock reading instead.
 
 ## Attribution
 
@@ -106,7 +128,7 @@ More modes (5, 8, …) can be added to `READING_MODES` in `app.js`. The Fibonacc
 1. **Boot.** The page loads in chat-fullscreen. The assistant says "Welcome to Tarot Chat" and announces the active mode ("I see you have selected 1-card General Insight mode…"). It lists the position roles for that mode and tells the user to open the spread (☰) when ready.
 2. **Inquiry.** The user types their question in the chat. The chat acknowledges and re-prompts the user to open the spread and pick the right number of cards.
 3. **Draw.** The user clicks the ☰ in the chat header to show the spread, then flips cards one at a time. Each flip emits a meta message into the chat (`Past: 3 of Hearts - Collaboration`). The spread enforces the mode's card limit.
-4. **Reading.** When the last required card flips, the chat sends a payload (system prompt + inquiry + cards with positions, terms, and full RWS descriptions from `lore.json`) to the LLM and renders the response. Currently this is a mock; the hook lives at the `TODO` in `chat.js` inside `answerCompletedReading`.
+4. **Reading.** When the last required card flips, the chat sends a payload (system prompt + inquiry + cards with positions, terms, and full RWS descriptions from `lore.json`) to `/api/chat` and renders the response. If the API is unavailable, it falls back to the mock response.
 5. **Follow-up.** The user can keep chatting in the same thread. Follow-up messages are appended to `state.followUps` and would be sent to the LLM with the same system prompt and card payload, plus the running thread, for increasingly specific readings.
 6. **New thread.** Clicking the **"New"** button in the chat header opens a confirmation modal with a mode dropdown. Selecting a mode and clicking "Start" clears the chat, reshuffles the deck into the new mode, and returns the user to chat-fullscreen. There is no way to change mode mid-thread.
 

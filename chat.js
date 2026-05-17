@@ -115,6 +115,7 @@ function bootChat(rootEl) {
     row.appendChild(bubble);
     thread.appendChild(row);
     thread.scrollTop = thread.scrollHeight;
+    return row;
   };
 
   const describeMode = (prefix) => {
@@ -190,25 +191,62 @@ function bootChat(rootEl) {
     return lines.join('\n');
   };
 
-  const answerCompletedReading = () => {
+  const requestChatCompletion = async (payload) => {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || `Chat endpoint failed with ${res.status}`);
+    }
+    return data.text || '';
+  };
+
+  const answerCompletedReading = async () => {
     const payload = createLLMPayload();
     window.Tarot52LastLLMPayload = payload;
-    appendMessage('assistant', renderMockReading(payload));
-    if (state.loreError) {
-      appendMessage('assistant', 'Note: lore.json could not be loaded, so this mock used only the card headline data.', 'meta');
+    const pending = appendMessage('assistant', 'Reading the spread...', 'meta');
+    try {
+      const text = await requestChatCompletion(payload);
+      pending.remove();
+      appendMessage('assistant', text || renderMockReading(payload));
+    } catch (err) {
+      pending.remove();
+      appendMessage('assistant', renderMockReading(payload));
+      appendMessage(
+        'assistant',
+        `Live AI is not available yet, so I used the local mock reading. ${err.message}`,
+        'meta'
+      );
+      if (state.loreError) {
+        appendMessage('assistant', 'Note: lore.json could not be loaded, so this mock used only the card headline data.', 'meta');
+      }
     }
   };
 
-  const answerFollowUp = (text) => {
+  const answerFollowUp = async (text) => {
     state.followUps.push({ role: 'user', content: text });
-    const cardTerms = state.cards.map((card) => `${card.positionName}: ${card.term}`).join('; ');
-    appendMessage(
-      'assistant',
-      `Mock follow-up noted. I would keep reading through ${cardTerms}. With the LLM connected, this is where the answer would get more specific to your added context while staying inside the ${state.mode.label} frame.`
-    );
+    const payload = createLLMPayload();
+    window.Tarot52LastLLMPayload = payload;
+    const pending = appendMessage('assistant', 'Reading your follow-up...', 'meta');
+    try {
+      const reply = await requestChatCompletion(payload);
+      pending.remove();
+      appendMessage('assistant', reply);
+    } catch (err) {
+      pending.remove();
+      const cardTerms = state.cards.map((card) => `${card.positionName}: ${card.term}`).join('; ');
+      appendMessage(
+        'assistant',
+        `Mock follow-up noted. I would keep reading through ${cardTerms}. With the LLM connected, this is where the answer would get more specific to your added context while staying inside the ${state.mode.label} frame.`
+      );
+      appendMessage('assistant', `Live AI is not available yet. ${err.message}`, 'meta');
+    }
   };
 
-  const submit = () => {
+  const submit = async () => {
     const text = input.value.trim();
     if (!text) return;
     appendMessage('user', text);
@@ -216,7 +254,7 @@ function bootChat(rootEl) {
     autoGrow();
 
     if (state.readingComplete) {
-      answerFollowUp(text);
+      await answerFollowUp(text);
       return;
     }
 
@@ -356,7 +394,6 @@ function bootChat(rootEl) {
     state.cards = e.detail.cards || [];
     state.readingComplete = true;
     setPlaceholder();
-    // TODO: Replace this mock response with the actual LLM call using createLLMPayload().
     answerCompletedReading();
   });
 
