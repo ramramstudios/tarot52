@@ -50,9 +50,9 @@ function firstSentence(text) {
   return (match ? match[1] : text).trim();
 }
 
-// Belt-and-suspenders prose enforcement. The system prompt asks the model not
-// to use markdown structure, but if it slips one in, we strip it here so the
-// chat stays conversational regardless of the model.
+// Belt-and-suspenders prose enforcement. The system prompt asks the model for
+// plain, compact replies, but if it slips into markdown or stacked paragraph
+// blocks, we smooth it back into a conversational chat bubble.
 function stripMarkdown(text) {
   if (!text) return '';
   return text
@@ -71,8 +71,9 @@ function stripMarkdown(text) {
     .replace(/(?<!\w)_([^_\n]+)_(?!\w)/g, '$1')
     // Strip inline code backticks (keep content)
     .replace(/`([^`]+)`/g, '$1')
-    // Collapse 3+ newlines down to 2 (single blank line between paragraphs)
-    .replace(/\n{3,}/g, '\n\n')
+    // Collapse model paragraph breaks into a single chat-style text block.
+    .replace(/[ \t]*\n+[ \t]*/g, ' ')
+    .replace(/[ \t]{2,}/g, ' ')
     .trim();
 }
 
@@ -93,6 +94,7 @@ const FOLLOW_UP_SYSTEM_PROMPT = [
   'Answer the querent\'s latest follow-up directly as a continuation of the existing conversation.',
   'Do not begin by re-announcing the drawn card, restating the spread, restating position mappings, or repeating the card\'s one-word term as if this were a new reading.',
   'Use the original card draw as shared context. Refer to a card, position, or term only when it genuinely helps answer the follow-up.',
+  'Default to one compact text block, often 1-3 statements or fragments. Do not use blank lines unless the user explicitly asks for a structured answer.',
   'If the querent asks for a recap, alternative interpretation, or a closer look at a specific card, then revisit only the requested part instead of replaying the whole opening reading.',
 ].join(' ');
 
@@ -267,44 +269,38 @@ function bootChat(rootEl) {
       return renderMockCelticCross(payload);
     }
 
-    const paragraphs = [];
+    const statements = [];
     const modeLabel = payload.mode?.label || 'reading';
-    paragraphs.push(`On your question — "${payload.userPrompt}" — here is a ${modeLabel.toLowerCase()} take.`);
+    statements.push(`On "${payload.userPrompt}", the ${modeLabel.toLowerCase()} points here:`);
 
     payload.cards.forEach((card) => {
       const loreLine = firstSentence(card.description);
       const opener = payload.cards.length > 1
-        ? `For ${card.positionName.toLowerCase()}, you drew the ${card.name}, the ${card.tarot} in the Rider-Waite deck. The headline is ${card.term.toLowerCase()}.`
-        : `You drew the ${card.name}, the ${card.tarot} in the Rider-Waite deck. The headline is ${card.term.toLowerCase()}.`;
-      paragraphs.push(loreLine ? `${opener} ${loreLine}` : opener);
+        ? `${card.positionName}: ${card.name} - ${card.term.toLowerCase()}.`
+        : `${card.name} - ${card.term.toLowerCase()}.`;
+      statements.push(loreLine ? `${opener} ${loreLine}` : opener);
     });
 
-    paragraphs.push('This is a local placeholder while the live model is unavailable. With the API reachable, the reading would weave these images more closely against the specifics of your question and the structure of the mode you chose.');
-    return paragraphs.join('\n\n');
+    statements.push('Local placeholder: with the API reachable, this would get sharper and more specific instead of expanding into a full canned read.');
+    return statements.join(' ');
   };
 
   // Celtic Cross-shaped mock: orientation -> heart -> larger cross -> Staff
   // -> one relational dynamic -> synthesis, so the flow is testable offline.
   const renderMockCelticCross = (payload) => {
     const [present, challenge, past, future, above, below, advice, external, hopesFears, outcome] = payload.cards;
-    const cardLabel = (c) => `the ${c.name} (${c.tarot}) — ${c.term.toLowerCase()}`;
+    const cardLabel = (c) => `${c.name} - ${c.term.toLowerCase()}`;
     const lore = (c) => firstSentence(c.description) || '';
 
-    const paragraphs = [];
+    const statements = [];
 
-    paragraphs.push(`On your question — "${payload.userPrompt}" — here is a Celtic Cross. Ten cards in two sections: the Circle/Cross is your inner and outer state, and the Staff is how you sit inside the wider context. Read this as a story, not a list.`);
+    statements.push(`On "${payload.userPrompt}", the Celtic Cross reads less like a list and more like this: ${cardLabel(present)} at the center, crossed by ${cardLabel(challenge)} - the live matter and the pressure on it. ${lore(present)} ${lore(challenge)}`.trim());
 
-    paragraphs.push(`At the heart sit two cards together. The Present is ${cardLabel(present)}. Pressing across it is the Challenge, ${cardLabel(challenge)} — the friction you are actually contending with, even if it does not look like friction at first. ${lore(present)} ${lore(challenge)}`.trim());
+    statements.push(`The wider shape runs from ${cardLabel(past)} into ${cardLabel(future)}, with ${cardLabel(below)} underneath and ${cardLabel(above)} above; outside pressure shows as ${cardLabel(external)}, while ${cardLabel(hopesFears)} tangles hope with fear.`);
 
-    paragraphs.push(`Around that heart, the larger cross runs along two crossing axes. On the time axis, the Past, ${cardLabel(past)}, is the ground the Present stands on, and the Future, ${cardLabel(future)}, is the near-term step you are about to navigate. On the consciousness axis, Above, ${cardLabel(above)}, is what you are consciously working toward, and Below, ${cardLabel(below)}, is the subconscious current under it all.`);
+    statements.push(`The most useful lever is ${cardLabel(advice)} against a current outcome of ${cardLabel(outcome)}: not destiny, just the line things keep taking unless your posture changes. Local placeholder, compressed on purpose.`);
 
-    paragraphs.push(`The Staff brings in the outer world. Advice arrives as ${cardLabel(advice)}, a posture worth trying. External Influences show up as ${cardLabel(external)}, the people or energies acting on the situation from outside your control. Hopes and Fears wear the face of ${cardLabel(hopesFears)} — and as often happens, what is hoped for and what is feared are tangled together. The Outcome card, ${cardLabel(outcome)}, points to where the situation is currently leaning if nothing changes.`);
-
-    paragraphs.push(`One dynamic worth lifting up here is Above and Below — ${above.term.toLowerCase()} aimed for, ${below.term.toLowerCase()} running underneath. Notice whether the conscious goal and the subconscious driver are pulling the same direction or quietly fighting each other; that gap is often where the real friction lives.`);
-
-    paragraphs.push(`Brought back to your question: the heart is ${present.term.toLowerCase()} crossed by ${challenge.term.toLowerCase()}, the trajectory is ${outcome.term.toLowerCase()}, and the lever in your hands is the Advice card, ${advice.term.toLowerCase()}. This is a local placeholder while the live model is unavailable — with the API reachable, the reading would name the specific pairings that make this particular draw spark, rather than the generic one shown here.`);
-
-    return paragraphs.join('\n\n');
+    return statements.join(' ');
   };
 
   const requestChatCompletion = async (payload) => {

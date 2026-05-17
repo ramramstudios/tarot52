@@ -83,10 +83,6 @@ function extractResponseText(data) {
   return parts.join('\n').trim();
 }
 
-function getMaxOutputTokens(payload) {
-  return payload.mode?.count >= 10 ? 1800 : 900;
-}
-
 export async function OPTIONS(request) {
   return new Response(null, {
     status: 204,
@@ -121,7 +117,7 @@ export async function POST(request) {
     ? payload.systemPrompt
     : [
       'You are Tarot 52, a reflective tarot reading assistant. Use the cards as symbolic prompts, not as fixed predictions.',
-      'Write in connected prose with genuine warmth, directness, and clean rhythm. Lead with the useful insight, avoid hollow preambles, avoid markdown, avoid bullets unless the content is genuinely enumerable, and make every sentence earn its place.',
+      'Write one compact conversational text block with genuine warmth, directness, and clean rhythm. Lead with the useful insight, avoid hollow preambles, avoid markdown, avoid bullets unless the user explicitly asks for structure, and make every statement earn its place.',
     ].join(' ');
 
   try {
@@ -135,7 +131,6 @@ export async function POST(request) {
         model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
         instructions,
         input: buildInput(payload),
-        max_output_tokens: getMaxOutputTokens(payload),
       }),
     });
 
