@@ -19,6 +19,32 @@ function firstSentence(text) {
   return (match ? match[1] : text).trim();
 }
 
+// Belt-and-suspenders prose enforcement. The system prompt asks the model not
+// to use markdown structure, but if it slips one in, we strip it here so the
+// chat stays conversational regardless of the model.
+function stripMarkdown(text) {
+  if (!text) return '';
+  return text
+    // Strip ATX headers: leading #, ##, ### ...
+    .replace(/^[ \t]*#{1,6}[ \t]+/gm, '')
+    // Strip horizontal rules: ---, ***, ___
+    .replace(/^[ \t]*([-*_])\1{2,}[ \t]*$/gm, '')
+    // Strip bullet markers at line start: -, *, + followed by space
+    .replace(/^[ \t]*[-*+][ \t]+/gm, '')
+    // Strip ordered list markers: 1. 2. ...
+    .replace(/^[ \t]*\d+\.[ \t]+/gm, '')
+    // Strip bold/italic markers: **foo**, __foo__, *foo*, _foo_
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/(?<!\w)\*([^*\n]+)\*(?!\w)/g, '$1')
+    .replace(/(?<!\w)_([^_\n]+)_(?!\w)/g, '$1')
+    // Strip inline code backticks (keep content)
+    .replace(/`([^`]+)`/g, '$1')
+    // Collapse 3+ newlines down to 2 (single blank line between paragraphs)
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function getFallbackMode() {
   if (window.getTarot52ReadingMode) return window.getTarot52ReadingMode(1);
   return {
@@ -174,21 +200,21 @@ function bootChat(rootEl) {
   };
 
   const renderMockReading = (payload) => {
-    const lines = [
-      `Here is a scaffolded ${payload.mode.label} reading for: "${payload.userPrompt}"`,
-      '',
-    ];
+    // Conversational prose fallback for when the live API is not available.
+    // Mirrors the style guide so the UX feels consistent even offline.
+    const paragraphs = [];
+    paragraphs.push(`On your question — "${payload.userPrompt}" — the cards offer this lens.`);
 
     payload.cards.forEach((card) => {
       const loreLine = firstSentence(card.description);
-      lines.push(`${card.positionName}: ${card.name} (${card.tarot})`);
-      lines.push(`Frame: ${card.term}. ${card.positionPrompt}`);
-      if (loreLine) lines.push(`Symbolic material: ${loreLine}`);
-      lines.push('');
+      const opener = payload.cards.length > 1
+        ? `For ${card.positionName.toLowerCase()}, you drew the ${card.name} — in tarot, the ${card.tarot}. The headline is ${card.term.toLowerCase()}.`
+        : `You drew the ${card.name} — in tarot, the ${card.tarot}. The headline is ${card.term.toLowerCase()}.`;
+      paragraphs.push(loreLine ? `${opener} ${loreLine}` : opener);
     });
 
-    lines.push('Mock synthesis: let the cards interrupt the obvious answer. Notice where the terms above feel alive, resistant, or strangely specific. A future LLM response will use this same payload, plus the full thread context, to get more precise as you add detail.');
-    return lines.join('\n');
+    paragraphs.push('This is a local placeholder reading while the live model is unavailable. Once the API is reachable, the reading will weave these card images more deeply against the specifics of your question.');
+    return paragraphs.join('\n\n');
   };
 
   const requestChatCompletion = async (payload) => {
@@ -211,7 +237,7 @@ function bootChat(rootEl) {
     try {
       const text = await requestChatCompletion(payload);
       pending.remove();
-      appendMessage('assistant', text || renderMockReading(payload));
+      appendMessage('assistant', stripMarkdown(text) || renderMockReading(payload));
     } catch (err) {
       pending.remove();
       appendMessage('assistant', renderMockReading(payload));
@@ -234,7 +260,7 @@ function bootChat(rootEl) {
     try {
       const reply = await requestChatCompletion(payload);
       pending.remove();
-      appendMessage('assistant', reply);
+      appendMessage('assistant', stripMarkdown(reply));
     } catch (err) {
       pending.remove();
       const cardTerms = state.cards.map((card) => `${card.positionName}: ${card.term}`).join('; ');

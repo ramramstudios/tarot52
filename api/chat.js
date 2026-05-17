@@ -103,13 +103,12 @@ export async function POST(request) {
     return jsonResponse(request, 400, { error: 'Missing userPrompt or cards' });
   }
 
-  const instructions = [
-    payload.systemPrompt || '',
-    'You are Tarot 52, a reflective tarot reading assistant.',
-    'Use the cards as symbolic prompts, not as fixed predictions.',
-    'Be warm, specific, and grounded. Avoid claiming certainty about the future.',
-    'Structure the answer around each card position, then give a concise synthesis and one useful reflection question.',
-  ].filter(Boolean).join('\n\n');
+  // The frontend owns voice, format, and structure via payload.systemPrompt.
+  // The API only adds a minimal fallback identity for the rare case where the
+  // frontend forgot to send one. Do NOT add tone/format rules here.
+  const instructions = payload.systemPrompt
+    ? payload.systemPrompt
+    : 'You are Tarot 52, a reflective tarot reading assistant. Use the cards as symbolic prompts, not as fixed predictions.';
 
   try {
     const response = await fetch('https://api.openai.com/v1/responses', {
