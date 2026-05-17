@@ -76,6 +76,29 @@ function renderError(err) {
   `;
 }
 
+function initBackToSpread(page) {
+  const backLink = page.querySelector('#backToSpread');
+  if (!backLink) return;
+
+  backLink.addEventListener('click', (e) => {
+    let referrerUrl;
+    try {
+      referrerUrl = document.referrer ? new URL(document.referrer) : null;
+    } catch {
+      referrerUrl = null;
+    }
+
+    const cameFromSpread = referrerUrl
+      && referrerUrl.origin === window.location.origin
+      && /(?:^|\/)(?:index\.html)?$/.test(referrerUrl.pathname);
+
+    if (cameFromSpread && window.history.length > 1) {
+      e.preventDefault();
+      window.history.back();
+    }
+  });
+}
+
 async function render() {
   let lore;
   try {
@@ -95,7 +118,7 @@ async function render() {
   page.className = 'page page-lore';
   page.innerHTML = `
     <nav class="page-nav">
-      <a class="nav-link" href="index.html">← Back to spread</a>
+      <a class="nav-link" href="index.html" id="backToSpread">← Back to spread</a>
     </nav>
     <header class="page-header">
       <h1>Lore</h1>
@@ -115,6 +138,7 @@ async function render() {
   const main = document.getElementById('app');
   main.innerHTML = '';
   main.appendChild(page);
+  initBackToSpread(page);
 }
 
 window.addEventListener('DOMContentLoaded', render);

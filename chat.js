@@ -4,6 +4,37 @@
    response until a model endpoint is wired in.
    =================================================== */
 
+const SESSION_MODE_KEY = 'tarot52.activeModeCount';
+const SESSION_COLLAPSED_KEY = 'tarot52.sidebarCollapsed';
+
+function readSessionInt(key) {
+  try {
+    const value = parseInt(sessionStorage.getItem(key) || '', 10);
+    return Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function readSessionBool(key) {
+  try {
+    const value = sessionStorage.getItem(key);
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionValue(key, value) {
+  try {
+    sessionStorage.setItem(key, String(value));
+  } catch {
+    // Ignore private browsing / storage-denied cases; the app still works.
+  }
+}
+
 async function loadLoreIndex() {
   const res = await fetch('lore.json');
   if (!res.ok) throw new Error(`Failed to load lore.json: ${res.status}`);
@@ -66,10 +97,11 @@ function syncPaneToggleButtons(collapsed) {
   });
 }
 
-function applyCollapsedState(collapsed) {
+function applyCollapsedState(collapsed, persist = true) {
   const layout = document.getElementById('layout');
   if (layout) layout.classList.toggle('chat-fullscreen', collapsed);
   syncPaneToggleButtons(collapsed);
+  if (persist) writeSessionValue(SESSION_COLLAPSED_KEY, Boolean(collapsed));
 }
 
 function bootChat(rootEl) {
@@ -82,12 +114,20 @@ function bootChat(rootEl) {
     return;
   }
 
-  // Always start collapsed (chat-fullscreen). The user opens the spread on demand
-  // when the assistant prompts them to pick cards.
+  const storedModeCount = readSessionInt(SESSION_MODE_KEY);
+  const savedModeCount = window.Tarot52ReadingModes?.[storedModeCount] ? storedModeCount : null;
+  const savedCollapsed = readSessionBool(SESSION_COLLAPSED_KEY);
+  const hasSavedSession = savedModeCount !== null;
+
+  // First visits start collapsed (chat-fullscreen). Returning from lore restores
+  // the last pane state, so an open spread stays open instead of showing welcome.
   // Defer to next frame so the sidebar gets a chance to lay out its cards at
   // their real size first — collapsing immediately while it's still visibility:hidden
   // can leave the grid with 0-height cells on mobile.
-  requestAnimationFrame(() => applyCollapsedState(true));
+  requestAnimationFrame(() => applyCollapsedState(
+    hasSavedSession && savedCollapsed !== null ? savedCollapsed : true,
+    false
+  ));
   document.querySelectorAll('[data-pane-toggle]').forEach((toggleBtn) => {
     toggleBtn.addEventListener('click', () => {
       const layout = document.getElementById('layout');
@@ -97,7 +137,9 @@ function bootChat(rootEl) {
   });
 
   const state = {
-    mode: getFallbackMode(),
+    mode: savedModeCount && window.getTarot52ReadingMode
+      ? window.getTarot52ReadingMode(savedModeCount)
+      : getFallbackMode(),
     inquiry: '',
     cards: [],
     readingComplete: false,
@@ -449,6 +491,7 @@ function bootChat(rootEl) {
       const wasWelcome = modalPurpose === 'welcome';
       closeModal();
       resetChatThread();
+      writeSessionValue(SESSION_MODE_KEY, count);
       // Always collapse chat back to fullscreen so the user starts focused on the chat.
       applyCollapsedState(true);
       // Welcome: trigger the same greeting as the original 'initial' boot.
@@ -459,26 +502,28 @@ function bootChat(rootEl) {
     });
   }
 
-  // First modechange from boot is consumed silently — the welcome modal
-  // owns the greeting. After the user picks a mode, tarot52:newsession
-  // dispatches a fresh modechange with the proper reason.
-  let suppressNextModechange = true;
   window.addEventListener('tarot52:modechange', (e) => {
-    if (suppressNextModechange) {
-      suppressNextModechange = false;
-      // Still capture the default mode in state so the welcome modal can
-      // preselect something sensible, but do not post any messages.
-      state.mode = e.detail.mode || getFallbackMode();
+    const detail = e.detail || {};
+    if (detail.reason === 'restore') {
+      state.mode = detail.mode || getFallbackMode();
       setPlaceholder();
       return;
     }
-    resetForMode(e.detail.mode, e.detail.reason);
+
+    resetForMode(detail.mode, detail.reason);
   });
 
-  // Open the welcome modal once the spread has had a chance to dispatch its
-  // initial modechange (which we swallow). Defer to next frame so order is
-  // deterministic across browsers.
-  requestAnimationFrame(() => openModal('welcome'));
+  // Open the welcome modal only for a fresh tab/session. Returning from lore
+  // restores the selected mode and pane state without interrupting the user.
+  requestAnimationFrame(() => {
+    if (hasSavedSession) {
+      window.dispatchEvent(new CustomEvent('tarot52:newsession', {
+        detail: { count: savedModeCount, reason: 'restore' },
+      }));
+      return;
+    }
+    openModal('welcome');
+  });
 
   window.addEventListener('tarot52:drawblocked', () => {
     if (!state.inquiry) {
