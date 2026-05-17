@@ -76,6 +76,10 @@ function extractResponseText(data) {
   return parts.join('\n').trim();
 }
 
+function getMaxOutputTokens(payload) {
+  return payload.mode?.count >= 10 ? 1800 : 900;
+}
+
 export async function OPTIONS(request) {
   return new Response(null, {
     status: 204,
@@ -121,7 +125,7 @@ export async function POST(request) {
         model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
         instructions,
         input: buildInput(payload),
-        max_output_tokens: 900,
+        max_output_tokens: getMaxOutputTokens(payload),
       }),
     });
 

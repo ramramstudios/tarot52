@@ -153,6 +153,71 @@ const READING_MODES = {
       'Length: roughly 350-500 words. The arc needs room.',
     ].join(' ')),
   },
+  10: {
+    count: 10,
+    label: 'Celtic Cross',
+    shortLabel: '10-card Celtic Cross',
+    intro: 'Ten cards in two sections — the Circle/Cross (inner state) and the Staff (outer context) — laid out as a full Celtic Cross reading.',
+    positions: [
+      {
+        name: 'Present',
+        prompt: 'Read this card as the heart of the matter — what is happening now and how the user is currently perceiving the situation.',
+      },
+      {
+        name: 'Challenge',
+        prompt: 'Read this card as the immediate friction the user is contending with. Even if the card reads positively, treat it as something that must still be navigated.',
+      },
+      {
+        name: 'Past',
+        prompt: 'Read this card as the formative context — the events and patterns that produced the present situation.',
+      },
+      {
+        name: 'Future',
+        prompt: 'Read this card as the near-term next step. Not the final destination — what is likely to unfold soon and need navigating.',
+      },
+      {
+        name: 'Above',
+        prompt: 'Read this card as the user\'s conscious goal or aspiration — what they are working toward with awareness.',
+      },
+      {
+        name: 'Below',
+        prompt: 'Read this card as the subconscious foundation — what is truly driving the user beneath their stated goals. Be alert for surprises here.',
+      },
+      {
+        name: 'Advice',
+        prompt: 'Read this card as the recommended posture or approach. Connect it explicitly to the Outcome card when the outcome appears unwelcome.',
+      },
+      {
+        name: 'External Influences',
+        prompt: 'Read this card as the people, energies, or events shaping the situation from outside the user\'s direct control.',
+      },
+      {
+        name: 'Hopes/Fears',
+        prompt: 'Read this card as what the user simultaneously hopes for and fears. Triangulate with the Below card if the meaning isn\'t immediately clear.',
+      },
+      {
+        name: 'Outcome',
+        prompt: 'Read this card as the trajectory the situation is currently on. Not destiny — the direction things are leaning if nothing changes.',
+      },
+    ],
+    systemPrompt: composeSystemPrompt([
+      'Mode: 10-card Celtic Cross.',
+      'Structure: ten cards in two sections. The Circle/Cross (cards 1-6) shows the querent\'s inner and outer state. The Staff (cards 7-10) shows the querent\'s relationship to their broader context. Within the Circle/Cross is a nested cross at the heart (cards 1 and 2) and a larger surrounding cross (cards 3-6) with two crossing axes that intersect at the Present: a time axis Past->Present->Future (cards 3 -> 1 -> 4) and a consciousness axis Below->Present->Above (cards 6 -> 1 -> 5).',
+      'Positions in draw order: 1 Present (the now), 2 Challenge (immediate friction), 3 Past (formative context), 4 Future (near-term next step), 5 Above (conscious goal), 6 Below (subconscious foundation), 7 Advice (recommended posture), 8 External Influences (forces outside the querent\'s control), 9 Hopes/Fears (often opaque, intertwined), 10 Outcome (current trajectory, not destiny).',
+      'CRITICAL: a literal card-by-card readout is the wrong way to read this spread. Weave a story by examining specific card relationships. The five most important pairings are: Above x Below (5 x 6) - is the conscious aspiration aligned with the subconscious drive? Above x Outcome (5 x 10) - is what the querent wants the same as what is trending? Future x Outcome (4 x 10) - how does the near-term next step shape the longer outcome? Below x Hopes/Fears (6 x 9) - the subconscious card often illuminates what is actually being hoped for or feared beneath awareness. Advice x Outcome (7 x 10) - when the outcome is unwelcome, the Advice card is the lever for changing it.',
+      'How to construct the reading:',
+      '(a) Open with orientation, not card one. Briefly frame the spread - name that this is a 10-card Celtic Cross with a Circle/Cross and a Staff, and signal the reading will be a story, not a list.',
+      '(b) Read the heart first. Interpret cards 1 and 2 TOGETHER as the nested central cross - the present situation and the immediate challenge pressing on it. This pairing is the kernel of the reading.',
+      '(c) Build the larger cross. Bring in cards 3 (Past), 4 (Future), 5 (Above), 6 (Below) to expand the picture. Explicitly walk the two crossing axes: the time axis (Past -> Present -> Future, cards 3 -> 1 -> 4) and the consciousness axis (Below -> Present -> Above, cards 6 -> 1 -> 5). These are not separate paragraphs but crossing currents that intersect at the Present.',
+      '(d) Move to the Staff. Bring in cards 7 (Advice), 8 (External Influences), 9 (Hopes/Fears), 10 (Outcome) as the querent\'s relationship to their broader context.',
+      '(e) Surface the key dynamics. After the positional reading, examine the relational pairings above and lift up the TWO OR THREE dynamics that produce the most insight for this particular draw. Do not mechanically walk all five for every reading - choose the ones where the actual cards create real tension, harmony, or revelation. Name the pairing and what it reveals.',
+      '(f) Land the reading. Close with a synthesis that ties the whole arc back to the inquiry. If the Outcome card is unwelcome, explicitly point to the Advice card as the lever for change, and note what near-term Future events (card 4) need to be navigated to influence the longer outcome.',
+      'Handling notes:',
+      '- Challenge (card 2) represents friction even when the card reads positively. A "good" card here means something the querent must still contend with, perhaps an opportunity that destabilizes the status quo.',
+      '- Hopes/Fears (card 9) is often hard to read in isolation. When unclear, cross-reference Below (card 6) to triangulate what is being hoped for or feared beneath conscious awareness.',
+      'Length: target 700-1100 words. Length is granted because the spread has 10 cards and 2-3 relational pairings to discuss, not because long readings sound authoritative. Do not pad. If a card or pairing does not earn its own paragraph, fold it into an adjacent one. The closing synthesis should be tight - three or four sentences that bring it home.',
+    ].join(' ')),
+  },
 };
 
 function getReadingMode(count) {
@@ -358,8 +423,9 @@ function bootSidebarSpread(rootEl) {
 
   // External request to begin a new session (from the chat "New" modal).
   window.addEventListener('tarot52:newsession', (e) => {
-    const mode = getReadingMode(parseInt(e.detail.count, 10));
-    start(mode, 'newspread');
+    const detail = e.detail || {};
+    const mode = getReadingMode(parseInt(detail.count, 10));
+    start(mode, detail.reason || 'newspread');
   });
 
   start(currentMode, 'initial');

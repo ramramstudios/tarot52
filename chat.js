@@ -202,6 +202,11 @@ function bootChat(rootEl) {
   const renderMockReading = (payload) => {
     // Conversational prose fallback for when the live API is unreachable.
     // Voice mirrors the system prompts so the UX stays consistent offline.
+    // Celtic Cross gets its own scaffold so the structure is recognizable.
+    if (payload.mode?.count === 10 && payload.cards.length === 10) {
+      return renderMockCelticCross(payload);
+    }
+
     const paragraphs = [];
     const modeLabel = payload.mode?.label || 'reading';
     paragraphs.push(`On your question — "${payload.userPrompt}" — here is a ${modeLabel.toLowerCase()} take.`);
@@ -215,6 +220,30 @@ function bootChat(rootEl) {
     });
 
     paragraphs.push('This is a local placeholder while the live model is unavailable. With the API reachable, the reading would weave these images more closely against the specifics of your question and the structure of the mode you chose.');
+    return paragraphs.join('\n\n');
+  };
+
+  // Celtic Cross-shaped mock: orientation -> heart -> larger cross -> Staff
+  // -> one relational dynamic -> synthesis, so the flow is testable offline.
+  const renderMockCelticCross = (payload) => {
+    const [present, challenge, past, future, above, below, advice, external, hopesFears, outcome] = payload.cards;
+    const cardLabel = (c) => `the ${c.name} (${c.tarot}) — ${c.term.toLowerCase()}`;
+    const lore = (c) => firstSentence(c.description) || '';
+
+    const paragraphs = [];
+
+    paragraphs.push(`On your question — "${payload.userPrompt}" — here is a Celtic Cross. Ten cards in two sections: the Circle/Cross is your inner and outer state, and the Staff is how you sit inside the wider context. Read this as a story, not a list.`);
+
+    paragraphs.push(`At the heart sit two cards together. The Present is ${cardLabel(present)}. Pressing across it is the Challenge, ${cardLabel(challenge)} — the friction you are actually contending with, even if it does not look like friction at first. ${lore(present)} ${lore(challenge)}`.trim());
+
+    paragraphs.push(`Around that heart, the larger cross runs along two crossing axes. On the time axis, the Past, ${cardLabel(past)}, is the ground the Present stands on, and the Future, ${cardLabel(future)}, is the near-term step you are about to navigate. On the consciousness axis, Above, ${cardLabel(above)}, is what you are consciously working toward, and Below, ${cardLabel(below)}, is the subconscious current under it all.`);
+
+    paragraphs.push(`The Staff brings in the outer world. Advice arrives as ${cardLabel(advice)}, a posture worth trying. External Influences show up as ${cardLabel(external)}, the people or energies acting on the situation from outside your control. Hopes and Fears wear the face of ${cardLabel(hopesFears)} — and as often happens, what is hoped for and what is feared are tangled together. The Outcome card, ${cardLabel(outcome)}, points to where the situation is currently leaning if nothing changes.`);
+
+    paragraphs.push(`One dynamic worth lifting up here is Above and Below — ${above.term.toLowerCase()} aimed for, ${below.term.toLowerCase()} running underneath. Notice whether the conscious goal and the subconscious driver are pulling the same direction or quietly fighting each other; that gap is often where the real friction lives.`);
+
+    paragraphs.push(`Brought back to your question: the heart is ${present.term.toLowerCase()} crossed by ${challenge.term.toLowerCase()}, the trajectory is ${outcome.term.toLowerCase()}, and the lever in your hands is the Advice card, ${advice.term.toLowerCase()}. This is a local placeholder while the live model is unavailable — with the API reachable, the reading would name the specific pairings that make this particular draw spark, rather than the generic one shown here.`);
+
     return paragraphs.join('\n\n');
   };
 

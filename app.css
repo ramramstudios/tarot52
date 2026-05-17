@@ -275,8 +275,12 @@ body.resizing * {
   font-size: 0.85rem;
   color: var(--text-muted);
   font-weight: 500;
+  min-width: 0;
   margin-right: auto; /* push the rest of the toolbar to the right */
   padding-left: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ============================================================
@@ -340,6 +344,8 @@ body.resizing * {
   color: var(--text);
   border: 1px solid var(--border-md);
   border-radius: var(--radius-sm);
+  width: 100%;
+  min-width: 0;
   padding: 0.55rem 0.7rem;
   font: inherit;
   font-size: 0.95rem;
@@ -401,6 +407,7 @@ body.resizing * {
   font-size: 0.95rem;
   white-space: pre-wrap;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 .chat-msg-user .chat-bubble {
   background: var(--purple-h);
@@ -663,6 +670,12 @@ body.resizing * {
 }
 .reading-row.suit-red   .reading-suit-icon { color: #f87171; }
 .reading-row.suit-black .reading-suit-icon { color: #e2d9f3; }
+.reading-position,
+.reading-card-name,
+.reading-meaning {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .reading-position {
   color: var(--text-muted);
   font-size: 0.72rem;
