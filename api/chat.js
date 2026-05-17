@@ -53,6 +53,29 @@ function buildInput(payload) {
   ].filter(Boolean).join('\n');
 }
 
+function extractResponseText(data) {
+  if (typeof data.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text.trim();
+  }
+
+  const parts = [];
+  const output = Array.isArray(data.output) ? data.output : [];
+
+  output.forEach((item) => {
+    if (typeof item.text === 'string') parts.push(item.text);
+    if (typeof item.content === 'string') parts.push(item.content);
+
+    if (Array.isArray(item.content)) {
+      item.content.forEach((content) => {
+        if (typeof content.text === 'string') parts.push(content.text);
+        if (typeof content.content === 'string') parts.push(content.content);
+      });
+    }
+  });
+
+  return parts.join('\n').trim();
+}
+
 export async function OPTIONS(request) {
   return new Response(null, {
     status: 204,
@@ -110,8 +133,18 @@ export async function POST(request) {
       });
     }
 
+    const text = extractResponseText(data);
+    if (!text) {
+      return jsonResponse(request, 502, {
+        error: 'OpenAI returned no text output',
+        model: data.model,
+        responseId: data.id,
+        outputTypes: Array.isArray(data.output) ? data.output.map((item) => item.type) : [],
+      });
+    }
+
     return jsonResponse(request, 200, {
-      text: data.output_text || '',
+      text,
       model: data.model,
       responseId: data.id,
     });
