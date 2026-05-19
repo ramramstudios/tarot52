@@ -35,9 +35,18 @@ function compactCard(card) {
   ].filter(Boolean).join('\n');
 }
 
+function compactKnowledgeDocument(doc) {
+  return [
+    `Title: ${doc.title || doc.path || 'Untitled knowledge document'}`,
+    doc.path ? `Path: ${doc.path}` : '',
+    doc.content || '',
+  ].filter(Boolean).join('\n');
+}
+
 function buildInput(payload) {
   const cards = Array.isArray(payload.cards) ? payload.cards : [];
   const followUps = Array.isArray(payload.followUps) ? payload.followUps : [];
+  const knowledgeBase = Array.isArray(payload.knowledgeBase) ? payload.knowledgeBase : [];
   const phase = payload.phase === 'followup' ? 'follow-up' : 'initial reading';
 
   return [
@@ -49,6 +58,10 @@ function buildInput(payload) {
     '',
     'Cards drawn in order:',
     cards.map(compactCard).join('\n\n'),
+    '',
+    knowledgeBase.length
+      ? `Knowledge base context (use silently to enrich the reading; do not quote or cite unless asked):\n${knowledgeBase.map(compactKnowledgeDocument).join('\n\n---\n\n')}`
+      : '',
     '',
     payload.initialReading
       ? `Initial assistant reading already delivered:\n${payload.initialReading}`

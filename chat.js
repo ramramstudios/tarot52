@@ -44,6 +44,29 @@ async function loadLoreIndex() {
   return cards;
 }
 
+async function loadKnowledgeBase() {
+  const manifestRes = await fetch('knowledge/manifest.json');
+  if (!manifestRes.ok) throw new Error(`Failed to load knowledge manifest: ${manifestRes.status}`);
+
+  const manifest = await manifestRes.json();
+  const documents = Array.isArray(manifest.documents) ? manifest.documents : [];
+  const loaded = await Promise.all(documents.map(async (doc) => {
+    const path = doc.path || '';
+    if (!path || path.includes('..')) return null;
+
+    const docRes = await fetch(`knowledge/${path}`);
+    if (!docRes.ok) throw new Error(`Failed to load knowledge/${path}: ${docRes.status}`);
+
+    return {
+      title: doc.title || path,
+      path: `knowledge/${path}`,
+      content: await docRes.text(),
+    };
+  }));
+
+  return loaded.filter(Boolean);
+}
+
 function firstSentence(text) {
   if (!text) return '';
   const match = text.match(/^(.+?[.!?])(?:\s|$)/);
@@ -161,6 +184,8 @@ function bootChat(rootEl) {
     readingComplete: false,
     loreIndex: null,
     loreError: null,
+    knowledgeBase: [],
+    knowledgeError: null,
     initialReading: '',
     followUps: [],
   };
@@ -170,6 +195,13 @@ function bootChat(rootEl) {
     .catch((err) => {
       state.loreError = err;
       console.warn('[chat] lore descriptions unavailable', err);
+    });
+
+  loadKnowledgeBase()
+    .then((documents) => { state.knowledgeBase = documents; })
+    .catch((err) => {
+      state.knowledgeError = err;
+      console.warn('[chat] knowledge base unavailable', err);
     });
 
   // Auto-grow textarea up to a cap.
@@ -256,6 +288,7 @@ function bootChat(rootEl) {
       },
       userPrompt: state.inquiry,
       cards,
+      knowledgeBase: state.knowledgeBase.slice(),
       initialReading: phase === 'followup' ? state.initialReading : '',
       followUps: state.followUps.slice(),
     };

@@ -70,6 +70,7 @@ The [`lore.json`](lore.json) data is structured to feed that prompt directly —
 | `app.css`         | All styles, shared across both pages                 |
 | `api/chat.js`     | Vercel API endpoint that calls OpenAI                |
 | `lore.json`       | The 52-card mapping data (terms + RWS descriptions)  |
+| `knowledge/`      | Optional Markdown knowledge base sent with readings  |
 | `tarot52.png`     | App icon / logo asset                                |
 
 ## Running locally
@@ -102,6 +103,24 @@ ALLOWED_ORIGINS=https://your-domain.example,https://ramramstudios.github.io
 ```
 
 If `/api/chat` is unavailable or the key is missing, the frontend keeps working and renders the local mock reading instead.
+
+## Knowledge base
+
+Add broader reading context in [`knowledge/`](knowledge). The browser loads [`knowledge/manifest.json`](knowledge/manifest.json), then fetches each listed Markdown file and sends it with the chat payload as background context.
+
+To add a document:
+
+1. Create a Markdown file in `knowledge/`, for example `knowledge/ethics.md`.
+2. Add it to `knowledge/manifest.json`:
+
+```json
+{
+  "title": "Ethics",
+  "path": "ethics.md"
+}
+```
+
+Keep documents concise. They are sent with every model request, so this is best for durable interpretive guidance, not huge books.
 
 ## Attribution
 
@@ -158,6 +177,9 @@ Payload sent to the LLM:
     { "name": "Ace of Spades", "term": "Lucidity",  "positionName": "Past",    "tarot": "Ace of Swords", "description": "..." },
     { "name": "3 of Spades",   "term": "Heartbreak","positionName": "Present", "tarot": "Three of Swords", "description": "..." },
     { "name": "4 of Spades",   "term": "Rest",      "positionName": "Future",  "tarot": "Four of Swords", "description": "..." }
+  ],
+  "knowledgeBase": [
+    { "title": "Reading Principles", "path": "knowledge/reading-principles.md", "content": "..." }
   ],
   "initialReading": "",
   "followUps": []

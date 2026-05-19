@@ -1,0 +1,12 @@
+{
+  "documents": [
+    {
+      "title": "Reading Principles",
+      "path": "reading-principles.md"
+    },
+    {
+      "title": "Symbolic Vocabulary",
+      "path": "symbolic-vocabulary.md"
+    }
+  ]
+}
