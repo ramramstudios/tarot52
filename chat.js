@@ -218,7 +218,7 @@ function bootChat(rootEl) {
       : `Ask your ${state.mode.count}-card question...`;
   };
 
-  const appendMessage = (role, text, tone = '') => {
+  const appendMessage = (role, text, tone = '', extras = null) => {
     // Drop the empty-state on first message.
     const empty = thread.querySelector('.chat-empty');
     if (empty) empty.remove();
@@ -228,11 +228,38 @@ function bootChat(rootEl) {
     if (tone) row.classList.add(`chat-msg-${tone}`);
     const bubble = document.createElement('div');
     bubble.className = 'chat-bubble';
-    bubble.textContent = text;
+    if (extras && extras.leading) {
+      bubble.classList.add('chat-bubble-with-card');
+      bubble.appendChild(extras.leading);
+      const textNode = document.createElement('span');
+      textNode.className = 'chat-bubble-text';
+      textNode.textContent = text;
+      bubble.appendChild(textNode);
+    } else {
+      bubble.textContent = text;
+    }
     row.appendChild(bubble);
     thread.appendChild(row);
     thread.scrollTop = thread.scrollHeight;
     return row;
+  };
+
+  const buildMiniCard = (card) => {
+    const el = document.createElement('span');
+    el.className = `chat-card-mini ${card.colorClass}`;
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `
+      <span class="chat-card-mini-corner tl">
+        <span class="chat-card-mini-rank">${card.rank}</span>
+        <span class="chat-card-mini-suit">${card.symbol}</span>
+      </span>
+      <span class="chat-card-mini-center">${card.symbol}</span>
+      <span class="chat-card-mini-corner br">
+        <span class="chat-card-mini-rank">${card.rank}</span>
+        <span class="chat-card-mini-suit">${card.symbol}</span>
+      </span>
+    `;
+    return el;
   };
 
   const describeMode = (prefix) => {
@@ -587,7 +614,12 @@ function bootChat(rootEl) {
   window.addEventListener('tarot52:carddrawn', (e) => {
     state.cards = e.detail.cards || [];
     const { card, remaining } = e.detail;
-    appendMessage('assistant', `${card.positionName}: ${card.name} - ${card.term}.${remaining ? ` ${remaining} to draw.` : ''}`, 'meta');
+    appendMessage(
+      'assistant',
+      `${card.positionName}: ${card.name} - ${card.term}.${remaining ? ` ${remaining} to draw.` : ''}`,
+      'meta',
+      { leading: buildMiniCard(card) }
+    );
   });
 
   window.addEventListener('tarot52:readingcomplete', (e) => {
