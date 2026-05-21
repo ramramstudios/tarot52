@@ -73,9 +73,9 @@ function firstSentence(text) {
   return (match ? match[1] : text).trim();
 }
 
-// Belt-and-suspenders prose enforcement. The system prompt asks the model for
-// plain, compact replies, but if it slips into markdown or stacked paragraph
-// blocks, we smooth it back into a conversational chat bubble.
+// Clean markdown syntax while preserving intentional paragraph breaks and rhythm.
+// The system prompt now licenses varied response shapes (single sentence to
+// paragraphs to structured lists), so we preserve breaks that serve the prose.
 function stripMarkdown(text) {
   if (!text) return '';
   return text
@@ -84,8 +84,9 @@ function stripMarkdown(text) {
     // Strip horizontal rules: ---, ***, ___
     .replace(/^[ \t]*([-*_])\1{2,}[ \t]*$/gm, '')
     // Strip bullet markers at line start: -, *, + followed by space
+    // Preserve the content after the marker; bullets will collapse naturally
     .replace(/^[ \t]*[-*+][ \t]+/gm, '')
-    // Strip ordered list markers: 1. 2. ...
+    // Strip ordered list markers: 1. 2. ... but preserve the line break
     .replace(/^[ \t]*\d+\.[ \t]+/gm, '')
     // Strip bold/italic markers: **foo**, __foo__, *foo*, _foo_
     .replace(/\*\*([^*]+)\*\*/g, '$1')
@@ -94,9 +95,11 @@ function stripMarkdown(text) {
     .replace(/(?<!\w)_([^_\n]+)_(?!\w)/g, '$1')
     // Strip inline code backticks (keep content)
     .replace(/`([^`]+)`/g, '$1')
-    // Collapse model paragraph breaks into a single chat-style text block.
-    .replace(/[ \t]*\n+[ \t]*/g, ' ')
-    .replace(/[ \t]{2,}/g, ' ')
+    // Preserve intentional paragraph breaks (double newlines become \n\n)
+    // but collapse accidental ones (single newlines become spaces within paragraphs)
+    .replace(/[ \t]*\n[ \t]*\n[ \t]*/g, '\n\n') // normalize double newlines
+    .replace(/[ \t]*\n[ \t]*/g, ' ') // collapse single newlines to space
+    .replace(/[ \t]{2,}/g, ' ') // collapse multiple spaces
     .trim();
 }
 

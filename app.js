@@ -90,7 +90,7 @@ const READING_MODES = {
     positions: [
       {
         name: 'Lens',
-        prompt: 'Read this card as a single interpretive lens over the entire inquiry. Let its term and traditional symbolism shape the angle of approach, but apply that angle to what the user actually asked rather than dwelling on card lore in isolation.',
+        prompt: 'Read this card as a single interpretive lens over the entire inquiry. Let its symbolism shape the angle of approach, but apply that angle to what the user actually asked rather than dwelling on card lore in isolation.',
       },
     ],
     systemPrompt: composeSystemPrompt([
