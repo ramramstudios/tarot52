@@ -41,6 +41,7 @@ const TAROT_RANK_NAMES = {
   King: 'King',
 };
 const CARD_DISPLAY_RANKS = {
+  Ace: 'A',
   Jack: 'J',
   Queen: 'Q',
   King: 'K',

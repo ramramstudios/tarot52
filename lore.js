@@ -6,7 +6,7 @@
 
 const SUIT_SYMBOLS = { Clubs: '♣', Hearts: '♥', Spades: '♠', Diamonds: '♦' };
 const SUIT_COLOR_CLASS = { Hearts: 'suit-red', Diamonds: 'suit-red', Clubs: 'suit-black', Spades: 'suit-black' };
-const CARD_DISPLAY_RANKS = { Jack: 'J', Queen: 'Q', King: 'K' };
+const CARD_DISPLAY_RANKS = { Ace: 'A', Jack: 'J', Queen: 'Q', King: 'K' };
 
 function parsePoker(poker) {
   // "3 of Hearts" / "Ace of Spades" / "Jack of Clubs"

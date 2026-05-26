@@ -22,6 +22,7 @@ const ZODIAC_SIGNS = [
   'Pisces',
 ];
 const CHAT_CARD_DISPLAY_RANKS = {
+  Ace: 'A',
   Jack: 'J',
   Queen: 'Q',
   King: 'K',
