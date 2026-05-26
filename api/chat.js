@@ -73,6 +73,64 @@ function buildInput(payload) {
   ].filter(Boolean).join('\n');
 }
 
+function buildInstructions(payload) {
+  // The frontend owns voice, format, and structure via payload.systemPrompt.
+  // The API only adds a minimal fallback identity for the rare case where the
+  // frontend forgot to send one. Do NOT add tone/format rules here.
+  return payload.systemPrompt
+    ? payload.systemPrompt
+    : [
+      'You are Tarot 52, a reflective tarot reading assistant. Use the cards as symbolic prompts, not as fixed predictions.',
+      'Respond how the question needs. Some answers land in one sentence. Some need multiple paragraphs. Vary sentence length and response length. Lead with the useful insight, avoid hollow preambles and filler phrases. Write like a person with care and specificity. Do not use markdown unless asked.',
+    ].join(' ');
+}
+
+function shouldDebugEcho(request, payload) {
+  const url = new URL(request.url, 'http://localhost');
+  return url.searchParams.get('debug') === '1'
+    || payload._debug === true
+    || process.env.TAROT52_DEBUG === '1';
+}
+
+function summarizePayload(payload) {
+  const cards = Array.isArray(payload.cards) ? payload.cards : [];
+  const knowledgeBase = Array.isArray(payload.knowledgeBase) ? payload.knowledgeBase : [];
+  const followUps = Array.isArray(payload.followUps) ? payload.followUps : [];
+
+  return {
+    phase: payload.phase || 'initial',
+    mode: payload.mode,
+    cardCount: cards.length,
+    knowledgeDocCount: knowledgeBase.length,
+    followUpCount: followUps.length,
+  };
+}
+
+function logRequestSummary(payload, model, instructions, input) {
+  const cards = Array.isArray(payload.cards) ? payload.cards : [];
+  const knowledgeBase = Array.isArray(payload.knowledgeBase) ? payload.knowledgeBase : [];
+
+  console.log('[tarot52:request]', {
+    phase: payload.phase || 'initial',
+    model,
+    'mode.label': payload.mode?.label || null,
+    'cards.length': cards.length,
+    cards: cards.map((card) => `${card.name || 'Unknown'}/${card.positionName || 'Unpositioned'}`),
+    knowledgeBase: knowledgeBase.map((doc) => doc.title || doc.path || 'Untitled knowledge document'),
+    'userPrompt.length': String(payload.userPrompt || '').length,
+    'instructions.length': instructions.length,
+    'input.length': input.length,
+  });
+}
+
+function logErrorSummary(status, message, extra = {}) {
+  console.log('[tarot52:error]', {
+    status,
+    message,
+    ...extra,
+  });
+}
+
 function extractResponseText(data) {
   if (typeof data.output_text === 'string' && data.output_text.trim()) {
     return data.output_text.trim();
@@ -108,10 +166,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  if (!process.env.OPENAI_API_KEY) {
-    return jsonResponse(request, 500, { error: 'OPENAI_API_KEY is not configured' });
-  }
-
   let payload;
   try {
     payload = await request.json();
@@ -119,19 +173,34 @@ export async function POST(request) {
     return jsonResponse(request, 400, { error: 'Invalid JSON body' });
   }
 
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return jsonResponse(request, 400, { error: 'JSON body must be an object' });
+  }
+
+  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const instructions = buildInstructions(payload);
+  const input = buildInput(payload);
+  logRequestSummary(payload, model, instructions, input);
+
+  if (shouldDebugEcho(request, payload)) {
+    return jsonResponse(request, 200, {
+      debug: true,
+      model,
+      instructions,
+      input,
+      payloadSummary: summarizePayload(payload),
+    });
+  }
+
   if (!payload.userPrompt || !Array.isArray(payload.cards) || payload.cards.length === 0) {
+    logErrorSummary(400, 'Missing userPrompt or cards');
     return jsonResponse(request, 400, { error: 'Missing userPrompt or cards' });
   }
 
-  // The frontend owns voice, format, and structure via payload.systemPrompt.
-  // The API only adds a minimal fallback identity for the rare case where the
-  // frontend forgot to send one. Do NOT add tone/format rules here.
-  const instructions = payload.systemPrompt
-    ? payload.systemPrompt
-    : [
-      'You are Tarot 52, a reflective tarot reading assistant. Use the cards as symbolic prompts, not as fixed predictions.',
-      'Respond how the question needs. Some answers land in one sentence. Some need multiple paragraphs. Vary sentence length and response length. Lead with the useful insight, avoid hollow preambles and filler phrases. Write like a person with care and specificity. Do not use markdown unless asked.',
-    ].join(' ');
+  if (!process.env.OPENAI_API_KEY) {
+    logErrorSummary(500, 'OPENAI_API_KEY is not configured');
+    return jsonResponse(request, 500, { error: 'OPENAI_API_KEY is not configured' });
+  }
 
   try {
     const response = await fetch('https://api.openai.com/v1/responses', {
@@ -141,21 +210,27 @@ export async function POST(request) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
+        model,
         instructions,
-        input: buildInput(payload),
+        input,
       }),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      const message = data.error?.message || 'OpenAI request failed';
+      logErrorSummary(response.status, message);
       return jsonResponse(request, response.status, {
-        error: data.error?.message || 'OpenAI request failed',
+        error: message,
       });
     }
 
     const text = extractResponseText(data);
     if (!text) {
+      logErrorSummary(502, 'OpenAI returned no text output', {
+        model: data.model,
+        responseId: data.id,
+      });
       return jsonResponse(request, 502, {
         error: 'OpenAI returned no text output',
         model: data.model,
@@ -164,12 +239,20 @@ export async function POST(request) {
       });
     }
 
+    console.log('[tarot52:response]', {
+      model: data.model || model,
+      responseId: data.id,
+      usage: data.usage || null,
+      'text.length': text.length,
+    });
+
     return jsonResponse(request, 200, {
       text,
       model: data.model,
       responseId: data.id,
     });
   } catch (err) {
+    logErrorSummary(500, err instanceof Error ? err.message : 'Unexpected server error');
     return jsonResponse(request, 500, {
       error: err instanceof Error ? err.message : 'Unexpected server error',
     });

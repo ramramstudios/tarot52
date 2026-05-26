@@ -104,6 +104,14 @@ ALLOWED_ORIGINS=https://your-domain.example,https://ramramstudios.github.io
 
 If `/api/chat` is unavailable or the key is missing, the frontend keeps working and renders the local mock reading instead.
 
+### Debugging the model payload
+
+After completing a reading, run `Tarot52Debug.diff()` in the browser console to verify the last frontend payload against the backend-assembled `instructions` and `input`.
+
+To inspect the echo directly, POST the last payload to `/api/chat?debug=1`, for example: `curl -X POST 'https://your-deployment.vercel.app/api/chat?debug=1' -H 'Content-Type: application/json' -d @payload.json`.
+
+Request summaries and response metadata are logged with `[tarot52:request]`, `[tarot52:response]`, and `[tarot52:error]` in the Vercel dashboard or via `vercel logs <deployment-url>`.
+
 ## Knowledge base
 
 Add broader reading context in [`knowledge/`](knowledge). The browser loads [`knowledge/manifest.json`](knowledge/manifest.json), then fetches each listed Markdown file and sends it with the chat payload as background context.

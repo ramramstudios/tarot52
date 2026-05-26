@@ -206,6 +206,100 @@ function copyableBubbleText(bubble) {
   return (textEl || bubble).textContent.trim();
 }
 
+function getLastDebugPayload() {
+  const payload = window.Tarot52LastLLMPayload;
+  if (!payload) {
+    console.warn('[Tarot52Debug] No LLM payload yet. Send a reading request first.');
+    return null;
+  }
+  return payload;
+}
+
+function logDebugCheck(label, passed, details = '') {
+  const message = `[Tarot52Debug] ${passed ? 'PASS' : 'FAIL'}: ${label}${details ? ` (${details})` : ''}`;
+  const logger = passed ? console.log : console.warn;
+  logger(message);
+  return { label, passed, details };
+}
+
+window.Tarot52Debug = {
+  dumpLastPayload() {
+    const payload = getLastDebugPayload();
+    if (!payload) return null;
+
+    console.log('[Tarot52Debug] Last LLM payload:');
+    console.log(JSON.stringify(payload, null, 2));
+    return payload;
+  },
+
+  async echoLastPayload() {
+    const payload = getLastDebugPayload();
+    if (!payload) return null;
+
+    const response = await fetch('/api/chat?debug=1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.warn('[Tarot52Debug] Debug echo request failed:', response.status, data);
+      return data;
+    }
+
+    console.log('[Tarot52Debug] Backend debug echo:');
+    console.log(data);
+    return data;
+  },
+
+  async diff() {
+    const payload = getLastDebugPayload();
+    if (!payload) return null;
+
+    const echo = await window.Tarot52Debug.echoLastPayload();
+    if (!echo || echo.debug !== true) {
+      console.warn('[Tarot52Debug] No debug echo payload returned.');
+      return null;
+    }
+
+    const input = String(echo.input || '');
+    const cards = Array.isArray(payload.cards) ? payload.cards : [];
+    const knowledgeBase = Array.isArray(payload.knowledgeBase) ? payload.knowledgeBase : [];
+    const missingCardNames = cards
+      .map((card) => card.name)
+      .filter((name) => name && !input.includes(name));
+    const missingPositionNames = cards
+      .map((card) => card.positionName)
+      .filter((name) => name && !input.includes(name));
+    const missingKnowledgeTitles = knowledgeBase
+      .map((doc) => doc.title || doc.path)
+      .filter((title) => title && !input.includes(title));
+
+    const checks = [
+      logDebugCheck('instructions match payload.systemPrompt', echo.instructions === (payload.systemPrompt || '')),
+      logDebugCheck('input contains userPrompt', !payload.userPrompt || input.includes(payload.userPrompt)),
+      logDebugCheck(
+        'input contains every card.name',
+        missingCardNames.length === 0,
+        missingCardNames.length ? `missing: ${missingCardNames.join(', ')}` : ''
+      ),
+      logDebugCheck(
+        'input contains every card.positionName',
+        missingPositionNames.length === 0,
+        missingPositionNames.length ? `missing: ${missingPositionNames.join(', ')}` : ''
+      ),
+      logDebugCheck(
+        'input contains every knowledge doc title',
+        missingKnowledgeTitles.length === 0,
+        missingKnowledgeTitles.length ? `missing: ${missingKnowledgeTitles.join(', ')}` : ''
+      ),
+    ];
+
+    return { echo, checks };
+  },
+};
+
 function getFallbackMode() {
   if (window.getTarot52ReadingMode) return window.getTarot52ReadingMode(1);
   return {
