@@ -21,6 +21,11 @@ const ZODIAC_SIGNS = [
   'Aquarius',
   'Pisces',
 ];
+const CARD_DISPLAY_RANKS = {
+  Jack: 'J',
+  Queen: 'Q',
+  King: 'K',
+};
 
 function readSessionInt(key) {
   try {
@@ -94,6 +99,10 @@ function clearAstrologyProfile() {
     // Ignore storage-denied cases.
   }
   return {};
+}
+
+function getCardDisplayRank(rank) {
+  return CARD_DISPLAY_RANKS[rank] || rank;
 }
 
 async function loadLoreIndex() {
@@ -615,17 +624,18 @@ function bootChat(rootEl) {
   };
 
   const buildMiniCard = (card) => {
+    const displayRank = getCardDisplayRank(card.rank);
     const el = document.createElement('span');
     el.className = `chat-card-mini ${card.colorClass}`;
     el.setAttribute('aria-hidden', 'true');
     el.innerHTML = `
       <span class="chat-card-mini-corner tl">
-        <span class="chat-card-mini-rank">${card.rank}</span>
+        <span class="chat-card-mini-rank">${displayRank}</span>
         <span class="chat-card-mini-suit">${card.symbol}</span>
       </span>
       <span class="chat-card-mini-center">${card.symbol}</span>
       <span class="chat-card-mini-corner br">
-        <span class="chat-card-mini-rank">${card.rank}</span>
+        <span class="chat-card-mini-rank">${displayRank}</span>
         <span class="chat-card-mini-suit">${card.symbol}</span>
       </span>
     `;

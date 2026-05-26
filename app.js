@@ -40,6 +40,11 @@ const TAROT_RANK_NAMES = {
   Queen: 'Queen',
   King: 'King',
 };
+const CARD_DISPLAY_RANKS = {
+  Jack: 'J',
+  Queen: 'Q',
+  King: 'K',
+};
 
 // ---------------------------------------------------------------------------
 // System prompt construction
@@ -254,6 +259,10 @@ function getReadingMode(count) {
   return READING_MODES[count] || READING_MODES[1];
 }
 
+function getCardDisplayRank(rank) {
+  return CARD_DISPLAY_RANKS[rank] || rank;
+}
+
 function secureRandom(max) {
   const buf = new Uint32Array(1);
   window.crypto.getRandomValues(buf);
@@ -305,6 +314,7 @@ function dispatchTarotEvent(name, detail) {
 /** Build a single 3-D card element */
 function buildCard3D(rankIdx, suitIdx) {
   const rank = RANKS[rankIdx];
+  const displayRank = getCardDisplayRank(rank);
   const suit = SUITS[suitIdx];
   const meaning = MEANINGS[rankIdx][suitIdx];
 
@@ -324,12 +334,12 @@ function buildCard3D(rankIdx, suitIdx) {
       </div>
       <div class="card-face card-front-face ${suit.cls}">
         <div class="card-corner tl">
-          <span class="rank-label">${rank}</span>
+          <span class="rank-label">${displayRank}</span>
           <span class="suit-label">${suit.symbol}</span>
         </div>
         <div class="card-center-suit">${suit.symbol}</div>
         <div class="card-corner br" aria-hidden="true">
-          <span class="rank-label">${rank}</span>
+          <span class="rank-label">${displayRank}</span>
           <span class="suit-label">${suit.symbol}</span>
         </div>
       </div>

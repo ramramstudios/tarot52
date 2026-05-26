@@ -6,12 +6,17 @@
 
 const SUIT_SYMBOLS = { Clubs: '♣', Hearts: '♥', Spades: '♠', Diamonds: '♦' };
 const SUIT_COLOR_CLASS = { Hearts: 'suit-red', Diamonds: 'suit-red', Clubs: 'suit-black', Spades: 'suit-black' };
+const CARD_DISPLAY_RANKS = { Jack: 'J', Queen: 'Q', King: 'K' };
 
 function parsePoker(poker) {
   // "3 of Hearts" / "Ace of Spades" / "Jack of Clubs"
   const m = poker.match(/^(.+?) of (Clubs|Hearts|Spades|Diamonds)$/);
   if (!m) return { rank: poker, suit: '' };
   return { rank: m[1], suit: m[2] };
+}
+
+function getCardDisplayRank(rank) {
+  return CARD_DISPLAY_RANKS[rank] || rank;
 }
 
 async function loadLore() {
@@ -22,12 +27,13 @@ async function loadLore() {
 
 function buildRow(card) {
   const { rank, suit } = parsePoker(card.poker);
+  const displayRank = getCardDisplayRank(rank);
   const symbol = SUIT_SYMBOLS[suit] || '';
   const colorCls = SUIT_COLOR_CLASS[suit] || '';
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td class="col-card">
-      <span class="poker-rank">${rank}</span>
+      <span class="poker-rank">${displayRank}</span>
       <span class="poker-suit ${colorCls}">${symbol}</span>
     </td>
     <td class="col-term">${card.term}</td>
