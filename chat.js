@@ -103,6 +103,109 @@ function stripMarkdown(text) {
     .trim();
 }
 
+const COPY_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="8" y="8" width="10" height="10" rx="2"></rect>
+    <path d="M6 16H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>
+`;
+
+const CHECK_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="m5 12 4 4L19 6"></path>
+  </svg>
+`;
+
+function fallbackCopyText(text) {
+  const activeElement = document.activeElement;
+  const scratch = document.createElement('textarea');
+  scratch.value = text;
+  scratch.setAttribute('readonly', '');
+  scratch.style.position = 'fixed';
+  scratch.style.top = '-1000px';
+  scratch.style.left = '-1000px';
+  scratch.style.opacity = '0';
+  document.body.appendChild(scratch);
+  scratch.focus();
+  scratch.select();
+  scratch.setSelectionRange(0, scratch.value.length);
+
+  try {
+    return document.execCommand('copy');
+  } finally {
+    scratch.remove();
+    if (activeElement && typeof activeElement.focus === 'function') {
+      activeElement.focus();
+    }
+  }
+}
+
+async function copyText(text) {
+  const value = String(text || '');
+  if (!value.trim()) return false;
+
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch (err) {
+      console.warn('[chat] navigator.clipboard failed; trying fallback copy', err);
+    }
+  }
+
+  try {
+    const copied = fallbackCopyText(value);
+    if (!copied) console.warn('[chat] fallback copy command was not accepted');
+    return copied;
+  } catch (err) {
+    console.warn('[chat] copy failed', err);
+    return false;
+  }
+}
+
+function setCopyButtonState(button, state, label, title) {
+  clearTimeout(button._copyResetTimer);
+  button.classList.toggle('is-copied', state === 'copied');
+  button.classList.toggle('is-error', state === 'error');
+
+  if (state === 'copied') {
+    button.innerHTML = CHECK_ICON;
+    button.setAttribute('aria-label', 'Copied!');
+    button.setAttribute('title', 'Copied!');
+  } else if (state === 'error') {
+    button.innerHTML = COPY_ICON;
+    button.setAttribute('aria-label', 'Copy failed');
+    button.setAttribute('title', 'Copy failed');
+  } else {
+    button.innerHTML = COPY_ICON;
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', title);
+  }
+
+  if (state !== 'idle') {
+    button._copyResetTimer = setTimeout(() => {
+      setCopyButtonState(button, 'idle', label, title);
+    }, 1500);
+  }
+}
+
+function createCopyButton({ label, title, getText }) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'chat-copy-btn';
+  setCopyButtonState(button, 'idle', label, title);
+  button.addEventListener('click', async () => {
+    const copied = await copyText(getText());
+    setCopyButtonState(button, copied ? 'copied' : 'error', label, title);
+  });
+  return button;
+}
+
+function copyableBubbleText(bubble) {
+  const textEl = bubble.querySelector('.chat-bubble-text');
+  return (textEl || bubble).textContent.trim();
+}
+
 function getFallbackMode() {
   if (window.getTarot52ReadingMode) return window.getTarot52ReadingMode(1);
   return {
@@ -150,10 +253,18 @@ function bootChat(rootEl) {
   const thread     = rootEl.querySelector('#chatThread');
   const composer   = rootEl.querySelector('#chatComposer');
   const input      = rootEl.querySelector('#chatInput');
+  let composerActions = rootEl.querySelector('#chatComposerActions');
 
   if (!thread || !composer || !input) {
     console.warn('[chat] missing expected elements in root');
     return;
+  }
+
+  if (!composerActions) {
+    composerActions = document.createElement('div');
+    composerActions.className = 'chat-composer-actions';
+    composerActions.id = 'chatComposerActions';
+    composer.insertAdjacentElement('afterend', composerActions);
   }
 
   const storedModeCount = readSessionInt(SESSION_MODE_KEY);
@@ -209,9 +320,25 @@ function bootChat(rootEl) {
 
   // Auto-grow textarea up to a cap.
   const MAX_ROWS_PX = 200;
+  const composerCopyButton = createCopyButton({
+    label: 'Copy input',
+    title: 'Copy input',
+    getText: () => input.value,
+  });
+  composerCopyButton.classList.add('chat-composer-copy');
+  composerActions.appendChild(composerCopyButton);
+
+  const syncComposerCopyButton = () => {
+    const hasText = input.value.trim().length > 0;
+    composerActions.hidden = !hasText;
+    composerCopyButton.hidden = !hasText;
+    composerCopyButton.disabled = !hasText;
+  };
+
   const autoGrow = () => {
     input.style.height = 'auto';
     input.style.height = Math.min(input.scrollHeight, MAX_ROWS_PX) + 'px';
+    syncComposerCopyButton();
   };
   input.addEventListener('input', autoGrow);
 
@@ -229,6 +356,8 @@ function bootChat(rootEl) {
     const row = document.createElement('div');
     row.className = `chat-msg chat-msg-${role}`;
     if (tone) row.classList.add(`chat-msg-${tone}`);
+    const body = document.createElement('div');
+    body.className = 'chat-msg-body';
     const bubble = document.createElement('div');
     bubble.className = 'chat-bubble';
     if (extras && extras.leading) {
@@ -241,7 +370,20 @@ function bootChat(rootEl) {
     } else {
       bubble.textContent = text;
     }
-    row.appendChild(bubble);
+    body.appendChild(bubble);
+
+    if (tone !== 'meta') {
+      const actions = document.createElement('div');
+      actions.className = 'chat-msg-actions';
+      actions.appendChild(createCopyButton({
+        label: 'Copy message',
+        title: 'Copy message',
+        getText: () => copyableBubbleText(bubble),
+      }));
+      body.appendChild(actions);
+    }
+
+    row.appendChild(body);
     thread.appendChild(row);
     thread.scrollTop = thread.scrollHeight;
     return row;
@@ -633,6 +775,7 @@ function bootChat(rootEl) {
   });
 
   setPlaceholder();
+  syncComposerCopyButton();
 }
 
 window.bootChat = bootChat;

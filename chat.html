@@ -36,19 +36,22 @@
     </div>
   </div>
 
-  <form class="chat-composer" id="chatComposer" autocomplete="off">
-    <label class="visually-hidden" for="chatInput">Message</label>
-    <textarea
-      id="chatInput"
-      class="chat-input"
-      rows="1"
-      placeholder="Ask the cards…"
-      aria-label="Message"
-    ></textarea>
-    <button type="submit" class="chat-send" id="chatSend" aria-label="Send message">
-      <span aria-hidden="true">↑</span>
-    </button>
-  </form>
+  <div class="chat-composer-shell">
+    <form class="chat-composer" id="chatComposer" autocomplete="off">
+      <label class="visually-hidden" for="chatInput">Message</label>
+      <textarea
+        id="chatInput"
+        class="chat-input"
+        rows="1"
+        placeholder="Ask the cards…"
+        aria-label="Message"
+      ></textarea>
+      <button type="submit" class="chat-send" id="chatSend" aria-label="Send message">
+        <span aria-hidden="true">↑</span>
+      </button>
+    </form>
+    <div class="chat-composer-actions" id="chatComposerActions" hidden></div>
+  </div>
 
   <div
     class="modal-backdrop"
