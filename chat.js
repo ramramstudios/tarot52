@@ -21,7 +21,7 @@ const ZODIAC_SIGNS = [
   'Aquarius',
   'Pisces',
 ];
-const CARD_DISPLAY_RANKS = {
+const CHAT_CARD_DISPLAY_RANKS = {
   Jack: 'J',
   Queen: 'Q',
   King: 'K',
@@ -101,8 +101,8 @@ function clearAstrologyProfile() {
   return {};
 }
 
-function getCardDisplayRank(rank) {
-  return CARD_DISPLAY_RANKS[rank] || rank;
+function getChatCardDisplayRank(rank) {
+  return CHAT_CARD_DISPLAY_RANKS[rank] || rank;
 }
 
 async function loadLoreIndex() {
@@ -624,7 +624,7 @@ function bootChat(rootEl) {
   };
 
   const buildMiniCard = (card) => {
-    const displayRank = getCardDisplayRank(card.rank);
+    const displayRank = getChatCardDisplayRank(card.rank);
     const el = document.createElement('span');
     el.className = `chat-card-mini ${card.colorClass}`;
     el.setAttribute('aria-hidden', 'true');
