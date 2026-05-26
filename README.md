@@ -152,7 +152,7 @@ More modes (5, 8, …) can be added to `READING_MODES` in `app.js`. The Fibonacc
 
 ### Session flow
 
-1. **Boot.** The page loads in chat-fullscreen. The assistant says "Welcome to Tarot Chat" and announces the active mode ("I see you have selected 1-card General Insight mode…"). It lists the position roles for that mode and tells the user to open the spread (☰) when ready.
+1. **Boot.** The page loads in chat-fullscreen. The assistant says "Welcome to Poker Chat" and announces the active mode ("I see you have selected 1-card General Insight mode…"). It lists the position roles for that mode and tells the user to open the spread (☰) when ready.
 2. **Inquiry.** The user types their question in the chat. The chat acknowledges and re-prompts the user to open the spread and pick the right number of cards.
 3. **Draw.** The user clicks the ☰ in the chat header to show the spread, then flips cards one at a time. Each flip emits a meta message into the chat (`Past: 3 of Hearts - Collaboration`). The spread enforces the mode's card limit.
 4. **Reading.** When the last required card flips, the chat sends a payload (system prompt + inquiry + cards with positions, terms, and full RWS descriptions from `lore.json`) to `/api/chat` and renders the response. If the API is unavailable, it falls back to the mock response.

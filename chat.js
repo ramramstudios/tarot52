@@ -509,6 +509,7 @@ function bootChat(rootEl) {
     inquiry: '',
     cards: [],
     readingComplete: false,
+    lastReadCardCount: 0,
     loreIndex: null,
     loreError: null,
     knowledgeBase: [],
@@ -655,12 +656,13 @@ function bootChat(rootEl) {
     state.inquiry = '';
     state.cards = [];
     state.readingComplete = false;
+    state.lastReadCardCount = 0;
     state.initialReading = '';
     state.followUps = [];
     setPlaceholder();
 
     if (reason === 'initial') {
-      appendMessage('assistant', 'Welcome to Tarot Chat.');
+      appendMessage('assistant', 'Welcome to Poker Chat.');
       describeMode('You chose');
       return;
     }
@@ -761,27 +763,33 @@ function bootChat(rootEl) {
     return data.text || '';
   };
 
-  const answerInfinityDraw = async () => {
-    // Send the current accumulated cards as an 'initial' reading each time a card
-    // is drawn in Infinity mode. followUps carries the conversation history so the
-    // model knows what it already said about earlier cards.
+  const answerInfinityDraw = async (userMessage = '') => {
+    // User submitted (with or without a message) after drawing cards in Infinity mode.
+    // Append their message to the inquiry so the payload reflects it, then do a
+    // one-shot 'initial' read of all accumulated cards.
+    if (userMessage) {
+      state.inquiry = state.inquiry ? `${state.inquiry}\n${userMessage}` : userMessage;
+    }
+    state.readingComplete = true;
+    state.lastReadCardCount = state.cards.length;
+    setPlaceholder();
     const payload = createLLMPayload('initial');
     window.Tarot52LastLLMPayload = payload;
-    const pending = appendMessage('assistant', 'Reading the draw...', 'meta');
+    const pending = appendMessage('assistant', 'Reading the spread...', 'meta');
     try {
       const text = await requestChatCompletion(payload);
       pending.remove();
       const reading = stripMarkdown(text) || renderMockReading(payload);
-      // Store as follow-up history so the next draw knows what was already said.
-      state.followUps.push({ role: 'assistant', content: reading });
+      state.initialReading = reading;
       appendMessage('assistant', reading);
     } catch (err) {
       pending.remove();
       const reading = renderMockReading(payload);
-      state.followUps.push({ role: 'assistant', content: reading });
+      state.initialReading = reading;
       appendMessage('assistant', reading);
       appendMessage('assistant', `Live AI is not available yet. ${err.message}`, 'meta');
     }
+    applyCollapsedState(true);
   };
 
   const answerCompletedReading = async () => {
@@ -835,32 +843,54 @@ function bootChat(rootEl) {
 
   const submit = async () => {
     const text = input.value.trim();
-    if (!text) return;
-    appendMessage('user', text);
+    const isInfinity = !isFinite(state.mode.count);
+
+    // In Infinity mode, allow empty submit as long as cards have been drawn.
+    if (!text && !(isInfinity && state.cards.length > 0)) return;
+
+    if (text) appendMessage('user', text);
     input.value = '';
     autoGrow();
 
     if (state.readingComplete) {
-      await answerFollowUp(text);
+      // In Infinity mode, an empty submit after drawing new cards re-reads the full spread.
+      if (isInfinity && !text && state.cards.length > state.lastReadCardCount) {
+        await answerInfinityDraw('');
+        return;
+      }
+      if (text) await answerFollowUp(text);
       return;
     }
 
     if (!state.inquiry) {
-      state.inquiry = text;
+      state.inquiry = text || '';
       window.dispatchEvent(new CustomEvent('tarot52:inquiryready', {
-        detail: {
-          inquiry: state.inquiry,
-          mode: state.mode,
-        },
+        detail: { inquiry: state.inquiry, mode: state.mode },
       }));
-      appendMessage(
-        'assistant',
-        !isFinite(state.mode.count)
-          ? `Opening the spread. Draw as many cards as you like — each one will be read as it arrives.`
-          : `Opening the spread. Select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`} and I will read them in draw order for ${state.mode.label}.`
-      );
-      // Auto-expand the spread sidebar so the user can immediately pick cards.
+      if (isInfinity) {
+        appendMessage(
+          'assistant',
+          'Opening the spread. Draw as many cards as you like, then send again to read them — with or without a message.'
+        );
+      } else {
+        appendMessage(
+          'assistant',
+          `Opening the spread. Select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`} and I will read them in draw order for ${state.mode.label}.`
+        );
+      }
       applyCollapsedState(false);
+      return;
+    }
+
+    // Infinity mode: second submit (after inquiry set) with cards drawn → trigger reading.
+    if (isInfinity && state.cards.length > 0) {
+      await answerInfinityDraw(text);
+      return;
+    }
+
+    if (isInfinity) {
+      // Inquiry is set but no cards drawn yet — nudge the user to draw first.
+      appendMessage('assistant', 'Draw at least one card, then send to read the spread.', 'meta');
       return;
     }
 
@@ -1024,6 +1054,7 @@ function bootChat(rootEl) {
     state.inquiry = '';
     state.cards = [];
     state.readingComplete = false;
+    state.lastReadCardCount = 0;
     state.initialReading = '';
     state.followUps = [];
     input.value = '';
@@ -1130,15 +1161,6 @@ function bootChat(rootEl) {
       { leading: buildMiniCard(card) }
     );
 
-    if (isInfinity) {
-      // Each draw triggers a fresh AI response synthesizing all cards drawn so far.
-      // Mark reading active so follow-up messages go through answerFollowUp.
-      if (!state.readingComplete) {
-        state.readingComplete = true;
-        setPlaceholder();
-      }
-      answerInfinityDraw();
-    }
   });
 
   window.addEventListener('tarot52:readingcomplete', (e) => {
