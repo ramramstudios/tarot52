@@ -436,7 +436,7 @@ const FOLLOW_UP_SYSTEM_PROMPT = [
   'Answer the querent\'s latest follow-up directly as a continuation of the existing conversation.',
   'Do not begin by re-announcing the drawn card, restating the spread, restating position mappings, or repeating the card\'s one-word term as if this were a new reading.',
   'Use the original card draw as shared context. Refer to a card, position, or term only when it genuinely helps answer the follow-up.',
-  'Default to one compact text block, often 1-3 statements or fragments. Do not use blank lines unless the user explicitly asks for a structured answer.',
+  'Match response length to the question — a short clarifying follow-up may need one sentence; a deeper question may need more. Let the content decide.',
   'If the querent asks for a recap, alternative interpretation, or a closer look at a specific card, then revisit only the requested part instead of replaying the whole opening reading.',
 ].join(' ');
 
@@ -1080,9 +1080,10 @@ function bootChat(rootEl) {
   window.addEventListener('tarot52:carddrawn', (e) => {
     state.cards = e.detail.cards || [];
     const { card, remaining } = e.detail;
+    const positionLabel = state.mode.count === 1 ? '' : `${card.positionName}: `;
     appendMessage(
       'assistant',
-      `${card.positionName}: ${card.name} - ${card.term}.${remaining ? ` ${remaining} to draw.` : ''}`,
+      `${positionLabel}${card.name} - ${card.term}.${remaining ? ` ${remaining} to draw.` : ''}`,
       'meta',
       { leading: buildMiniCard(card) }
     );

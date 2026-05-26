@@ -2,75 +2,111 @@
   "signs": {
     "Aries": {
       "element": "Fire",
-      "sun": "The first sign of the zodiac, ruled by action planet Mars. Can motivate themselves to face fears and blow past hesitation.",
-      "moon": "Emotionally responsive and impulsive at times, leading with fiery passions over logic or reason.",
-      "rising": "Known as the go-getters of the zodiac. Don't let anything stand in their way of achieving personal goals."
+      "ruling_planet": "Mars",
+      "modality": "Cardinal",
+      "dates": "March 21 – April 19",
+      "sun": "Direct, straightforward, and uncomplicated pioneers who live in the moment. Natural athletes with an active, energetic spirit. Brave and independent with a childlike quality. Impatient but highly innovative — they love new starts and are happiest when life is moving forward.",
+      "moon": "Fiercely independent with an inner fire that surfaces even when the sun sign is low-key. Emotionally impulsive and defensive, taking things personally but resolving conflicts quickly. Easily bored by peaceful environments; motivated by instant gratification and bursts of passion.",
+      "rising": "Direct and quick — their first instinct is to do, not think. Youthful, forthright, and self-reliant. Competitive with themselves more than others. Quick to anger but never holds grudges. Often typecast as the independent one; surprisingly willing to compromise in close relationships."
     },
     "Taurus": {
       "element": "Earth",
-      "sun": "Drawn to a creative, indulgent lifestyle. Stubborn, loyal, and grounded. Ruled by Venus.",
-      "moon": "Delight in earthly pleasures and seek out emotional security.",
-      "rising": "Exude grace and sophistication, handling business with a sweet disposition."
+      "ruling_planet": "Venus",
+      "modality": "Fixed",
+      "dates": "April 20 – May 20",
+      "sun": "Solid, sensual, and security-driven. They work hard and relax deeply, drawing strong pleasure from the physical world — food, comfort, beauty, and touch. Possessive of people and things they love. Stubborn but dependable, with a steady plodding effort that always pays off.",
+      "moon": "Earthy, strong-willed, and rooted in the world of the senses. Emotionally they crave familiarity, stability, and material comfort. Deeply romantic with unwavering affections. Resist change and can be slow to adapt, but are fiercely loyal once committed.",
+      "rising": "Slow, steady, and capable with tremendous stamina and staying power. Resistant to change, fixed in their ways, and cautious before starting anything new. Highly sensual — they value quality, comfort, and physical pleasures. Possessive in partnerships but deeply loyal and calming to be around."
     },
     "Gemini": {
       "element": "Air",
-      "sun": "Chatty and talkative, in-the-know on news and gossip. Dualistic nature allows multiple perspectives.",
-      "moon": "Ruled by Mercury, enjoy discussing complex feelings with others for mindful emotional clarity.",
-      "rising": "Quick-witted, fast communicators, always looking for unique ways to express themselves."
+      "ruling_planet": "Mercury",
+      "modality": "Mutable",
+      "dates": "May 21 – June 20",
+      "sun": "Curious, flexible, and witty, with a strong urge for self-expression. They collect and share information with equal enthusiasm. Easily bored without mental stimulation, they flit between ideas and people. Sociable and adaptable but can be hard to pin down emotionally or in commitment.",
+      "moon": "Pleasant and charming on the surface but prone to inner restlessness and nervousness. Needs constant mental stimulation — reads, talks, and thinks constantly. Excellent with words; more comfortable discussing feelings than actually feeling them. Can seem emotionally detached when processing.",
+      "rising": "Curious, quick, and restless — they see the world as a place to learn and a social circle to move through. Clever and witty, sometimes intimidatingly so. May come across as brusque or cool at first, but are genuinely interested in people. Short attention spans but endlessly interesting."
     },
     "Cancer": {
       "element": "Water",
-      "sun": "Ruled by the Moon. Emotionally mature, intuitive, sensitive, and artistic. Guided by tender, loving, protective hearts.",
-      "moon": "Emotions have no limits or restraints. Leads to sweetness, kindness, emotional awareness and responsibility.",
-      "rising": "Tend to wear their hearts on their sleeves and take care of those they love."
+      "ruling_planet": "Moon",
+      "modality": "Cardinal",
+      "dates": "June 21 – July 22",
+      "sun": "Protective, sensitive, and deeply rooted in home and memory. Guided by feelings rather than logic, they resist change and treasure security. Complex and sometimes baffling to others, they hide their vulnerability but love deeply. Moodiness peaks when threatened; they retreat rather than confront.",
+      "moon": "The Moon is at home in Cancer. These natives have enormous potential for empathy and emotional attunement. They cling to people, places, and memories of the past. Deeply nurturing but also prone to moodiness and manipulation when they feel taken for granted. Wonderfully dependable overall.",
+      "rising": "Gentle and familiar — they enter a room quietly and move to the sides rather than center. Come across as sweet and approachable, even innocent. Highly sensitive to environment and prone to shyness in new situations. They seek structure and security in partnerships and function best with a dependable partner."
     },
     "Leo": {
       "element": "Fire",
-      "sun": "Ruled by the Sun. All about ego, will, and character. Creative, playful, and bold.",
-      "moon": "Possessing inner warmth, beyond generous. Shine their light onto those they care about.",
-      "rising": "Radiate positivity and charm. Confident, friendly, outgoing, and strong performers."
+      "ruling_planet": "Sun",
+      "modality": "Fixed",
+      "dates": "July 23 – August 22",
+      "sun": "Regal and dignified, with big dreams and a genuine desire to make the world better. Hard-working and intense when motivated, but capable of great laziness in downtime. Deeply hurt by ingratitude. Contrary to reputation, often humble and self-critical. Loyal, traditional, and idealistic.",
+      "moon": "Proud and emotionally dramatic when slighted, but rarely in public — they prefer dignity. Need lots of love and appreciation to thrive. Creative, generous, and warm. Like to organize and oversee their inner circle. Fixed in their emotional patterns; takes time to adjust to change.",
+      "rising": "Impossible not to notice — they radiate energy and magnetism. Highly self-aware and body-conscious, always aware of how they come across. Dramatic and given to grand gestures. Enthusiastic promoters who sometimes overestimate situations. Fun-loving, warm, generous, and youthful at heart."
     },
     "Virgo": {
       "element": "Earth",
-      "sun": "Governed by Mercury. Thinkers of the zodiac. Process information with diligence and use facts to solve problems.",
-      "moon": "Use calm nature to gain deep clarity on matters through a kind but reasonable lens.",
-      "rising": "Fact-finders and checkers of the zodiac. Fair-minded and slow to anger."
+      "ruling_planet": "Mercury",
+      "modality": "Mutable",
+      "dates": "August 23 – September 22",
+      "sun": "Respectable, hardworking, and deeply curious with a love of knowledge. Body-aware and health-conscious. Strong sense of responsibility — even when they try to be irresponsible, they worry. Perfectionist tendencies drive them toward mastery, but can tip into self-criticism and anxiety.",
+      "moon": "Find security in the details of everyday life — running errands, organizing, keeping things in order. Feel most useful when helping others. Can be prone to nagging and complaining, but are deeply devoted when appreciated. Calm and analytical, sometimes to the point of emotional under-expression.",
+      "rising": "Understated and intelligent with a reserved, sometimes shy aura. Need time to warm up to people and situations, which can read as standoffish. Highly body-aware and health-conscious. Worried, detail-oriented, and quietly charming once comfortable. Often attract people who need their help."
     },
     "Libra": {
       "element": "Air",
-      "sun": "Ruled by the airy part of Venus. Bon vivants, critical, artistic, and forever stylish.",
-      "moon": "Relationship-oriented. May base decisions on how they are viewed by others.",
-      "rising": "Value balance in life, preferring things to be even-keeled and civil."
+      "ruling_planet": "Venus",
+      "modality": "Cardinal",
+      "dates": "September 23 – October 22",
+      "sun": "Sociable, intellectual, and peace-loving — yet capable of quietly stirring up trouble in their attempts to please everyone. Experts at seeing all sides, which can veer into indecisiveness or evasiveness. Seek the middle ground and fairness above all. Refined, civil, and idealistic.",
+      "moon": "Have a powerful need for partnership and feel incomplete without a significant other. Sympathetic, charming, and drawn to mental rapport. Can concede too much in pursuit of harmony. Although diplomatic publicly, they can be tenacious arguers in long-term relationships.",
+      "rising": "Universally likable — they appear smooth, pleasant, and fair. Effortlessly attractive with charming smiles and a gentle approach. Enormously persuasive but always via soft-sell. Prone to passing the buck to preserve their nice-person image. Excellent mediators and natural peacemakers."
     },
     "Scorpio": {
       "element": "Water",
-      "sun": "Ruled by Mars and Pluto. Intense, mysterious, and ever-evolving.",
-      "moon": "Brooding nature that exudes passion. Loyal and unconditional in love once trust is won.",
-      "rising": "Ooze magnetism and dynamism. Not known to back away from a challenge."
+      "ruling_planet": "Mars & Pluto",
+      "modality": "Fixed",
+      "dates": "October 23 – November 21",
+      "sun": "Intensely determined with a real hunger for power — not prestige, but true depth of influence. Patient strategists who watch and wait for exactly the right moment. Unafraid of darkness, trauma, or the underside of life. Possess remarkable regenerative power when they embrace optimism.",
+      "moon": "Seek emotional intensity above all else. Gifted at seeing through facades to the emotional core of people. Fear betrayal deeply and may test partners unconsciously. Want all or nothing in relationships. Their emotional power and radar are exceptional, and their loyalty, once earned, is absolute.",
+      "rising": "Commanding presence that demands respect without effort — even quiet Scorpio risings are unmistakably powerful. See right through people, which can be intimidating or magnetic. Deeply private, strategic, and in control of their environment. Drawn to reliable, committed partners."
     },
     "Sagittarius": {
       "element": "Fire",
-      "sun": "Governed by Jupiter. Free-spirited, globe-trotting, philosophical mindset with a wild streak.",
-      "moon": "Considered lucky placement bringing excitement, adventure, and abundance. Can be defensive at times.",
-      "rising": "Jovial, optimistic, and full of energy. Sparkle with confidence."
+      "ruling_planet": "Jupiter",
+      "modality": "Mutable",
+      "dates": "November 22 – December 21",
+      "sun": "Free-spirited adventurers with grand schemes, big promises, and a deep hunger for experience, truth, and meaning. Philosophical and restless, always searching for something just out of reach. Optimistic teachers who can be blunt but are easy to forgive. Follow-through is their weak point.",
+      "moon": "Need personal freedom and space above all else. Extraordinarily cheerful and easygoing when not feeling caged in. Spontaneous, outdoorsy, and optimistic to a fault — they believe everything will work out. Hungry for knowledge and new experiences; make inspiring, adventurous companions.",
+      "rising": "See the world as an adventure full of hope and possibility. Direct, sometimes to the point of tactlessness, but likable enough to get away with it. Restless and always looking beyond the horizon. Great faith and enthusiasm, but follow-through and attention to detail are challenges."
     },
     "Capricorn": {
       "element": "Earth",
-      "sun": "Ruled by Saturn. Work hard toward advancing themselves in earthly matters.",
-      "moon": "Reflective and contemplative, working to build a better foundation with those they care about.",
-      "rising": "Known for diligence and effort when attaining success and prosperity."
+      "ruling_planet": "Saturn",
+      "modality": "Cardinal",
+      "dates": "December 22 – January 19",
+      "sun": "Ambitious and disciplined, driven by a desire for real-world achievement and earthly security. Hard workers with long-term vision and a respect for tradition. Can be hard on themselves. Their authority and competence grow more apparent with age.",
+      "moon": "Keep emotions under tight control, appearing steady and competent even during inner turbulence. Desire clear structure, boundaries, and realistic goals. Deeply need to feel worthwhile and respected in the world. Self-critical and prone to sarcasm as a defense, but capable of great loyalty.",
+      "rising": "Project an air of competence, discipline, and authority. Calm and cool-headed in all situations. Plan far ahead and naturally seek financial and emotional security. Garner reputations as pillars of strength. Can be too hard on themselves and benefit from letting their guard down."
     },
     "Aquarius": {
       "element": "Air",
-      "sun": "Ruled by Saturn and Uranus. Seek unique ways to problem-solve and approach life. Intellectual and innovative.",
-      "moon": "Integrates logic with sentimentality to attain deep understanding of inner life.",
-      "rising": "Can speak lucidly on many topics, using lofty knowledge to charm crowds and solve problems."
+      "ruling_planet": "Saturn & Uranus",
+      "modality": "Fixed",
+      "dates": "January 20 – February 18",
+      "sun": "Intellectual, innovative, and fiercely independent. Seek unique approaches to every problem and are drawn to anything that advances humanity. Can be emotionally detached, especially when denying more irrational feelings. Their humanitarian vision is genuine but can outpace personal connection.",
+      "moon": "Lifetime students of human nature — observant, analytical, and somewhat detached. Often feel like outsiders, which gives them a unique and broad perspective. Idealistic and progressive, but can deny more vulnerable emotions in an effort to stay above pettiness. Loyal once committed.",
+      "rising": "Unmistakably individual — they come across as unique, original, and slightly unusual in a compelling way. Often turned to for advice; intellectually curious about science and metaphysics. Hard to shock. May seem simultaneously humanitarian and a little aloof. Quietly enjoy surprising others."
     },
     "Pisces": {
       "element": "Water",
-      "sun": "Ruled by Jupiter and Neptune. Sentimental, intuitive, imaginative, and dreamy.",
-      "moon": "Hyper-attuned to the needs and emotions of others. Likely to predict what's on your mind.",
-      "rising": "Commits fully to their beliefs and has an active imagination."
+      "ruling_planet": "Jupiter & Neptune",
+      "modality": "Mutable",
+      "dates": "February 19 – March 20",
+      "sun": "Sentimental, intuitive, and deeply imaginative. Guided more by feeling than logic, they are among the most empathetic signs. Can struggle with real-world practicality but compensate with remarkable intuition and creativity. Drawn to art, music, writing, and anything that transcends the ordinary.",
+      "moon": "Dreamy and not always grounded in everyday reality, but gifted with boundless compassion. Can put themselves in anyone's shoes — sometimes to the point of losing themselves in others' suffering. Their sense of humor is delightfully odd. Most fulfilled through creative and artistic expression.",
+      "rising": "Gentle, imaginative, and fully committed to their beliefs. Come across as somewhat otherworldly and deeply empathetic. Sensitive to the emotional undercurrents of any environment. Their boundaries can be porous, making them absorb others' moods easily — both a gift and a challenge."
     }
   },
   "elements": {
