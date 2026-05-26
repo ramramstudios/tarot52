@@ -566,9 +566,10 @@ function bootChat(rootEl) {
   input.addEventListener('input', autoGrow);
 
   const setPlaceholder = () => {
+    const isInfinity = !isFinite(state.mode.count);
     input.placeholder = state.readingComplete
       ? 'Ask a follow-up...'
-      : `Ask your ${state.mode.count}-card question...`;
+      : isInfinity ? 'Ask your question…' : `Ask your ${state.mode.count}-card question...`;
   };
 
   const appendMessage = (role, text, tone = '', extras = null) => {
@@ -632,11 +633,21 @@ function bootChat(rootEl) {
 
   const describeMode = (prefix) => {
     const mode = state.mode;
+    const isInfinity = !isFinite(mode.count);
+    const modeLabel = isInfinity ? `∞ ${mode.label}` : `${mode.count}-card ${mode.label}`;
     const positions = mode.positions.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
-    appendMessage(
-      'assistant',
-      `${prefix} ${mode.count}-card ${mode.label} mode.\n\n${mode.intro}\n\n${positions}\n\nMeditate on your question, then type it below. Once you send it, the spread will open so you can draw ${mode.count === 1 ? 'your card' : `${mode.count} cards`}.`
-    );
+    const drawPrompt = isInfinity
+      ? 'Meditate on your question, then type it below. Once you send it, the spread will open and you can draw cards freely.'
+      : `Meditate on your question, then type it below. Once you send it, the spread will open so you can draw ${mode.count === 1 ? 'your card' : `${mode.count} cards`}.`;
+    const body = [
+      `${prefix} ${modeLabel} mode.`,
+      '',
+      mode.intro,
+      positions ? `\n${positions}` : '',
+      '',
+      drawPrompt,
+    ].filter((s) => s !== undefined).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    appendMessage('assistant', body);
   };
 
   const resetForMode = (mode, reason) => {
@@ -750,6 +761,29 @@ function bootChat(rootEl) {
     return data.text || '';
   };
 
+  const answerInfinityDraw = async () => {
+    // Send the current accumulated cards as an 'initial' reading each time a card
+    // is drawn in Infinity mode. followUps carries the conversation history so the
+    // model knows what it already said about earlier cards.
+    const payload = createLLMPayload('initial');
+    window.Tarot52LastLLMPayload = payload;
+    const pending = appendMessage('assistant', 'Reading the draw...', 'meta');
+    try {
+      const text = await requestChatCompletion(payload);
+      pending.remove();
+      const reading = stripMarkdown(text) || renderMockReading(payload);
+      // Store as follow-up history so the next draw knows what was already said.
+      state.followUps.push({ role: 'assistant', content: reading });
+      appendMessage('assistant', reading);
+    } catch (err) {
+      pending.remove();
+      const reading = renderMockReading(payload);
+      state.followUps.push({ role: 'assistant', content: reading });
+      appendMessage('assistant', reading);
+      appendMessage('assistant', `Live AI is not available yet. ${err.message}`, 'meta');
+    }
+  };
+
   const answerCompletedReading = async () => {
     const payload = createLLMPayload('initial');
     window.Tarot52LastLLMPayload = payload;
@@ -821,7 +855,9 @@ function bootChat(rootEl) {
       }));
       appendMessage(
         'assistant',
-        `Opening the spread. Select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`} and I will read them in draw order for ${state.mode.label}.`
+        !isFinite(state.mode.count)
+          ? `Opening the spread. Draw as many cards as you like — each one will be read as it arrives.`
+          : `Opening the spread. Select ${state.mode.count === 1 ? '1 card' : `${state.mode.count} cards`} and I will read them in draw order for ${state.mode.label}.`
       );
       // Auto-expand the spread sidebar so the user can immediately pick cards.
       applyCollapsedState(false);
@@ -869,10 +905,12 @@ function bootChat(rootEl) {
     if (!modalSelect) return;
     const modes = window.Tarot52ReadingModes || {};
     modalSelect.innerHTML = '';
-    Object.values(modes).forEach((mode) => {
+    Object.entries(modes).forEach(([key, mode]) => {
       const opt = document.createElement('option');
-      opt.value = String(mode.count);
-      opt.textContent = `${mode.count} - ${mode.label}`;
+      opt.value = key;
+      opt.textContent = isFinite(mode.count)
+        ? `${mode.count} - ${mode.label}`
+        : `∞ - ${mode.label}`;
       modalSelect.appendChild(opt);
     });
   };
@@ -934,7 +972,9 @@ function bootChat(rootEl) {
     populateModeOptions(); // refresh in case modes are added at runtime
     // Default the dropdown to the currently active mode (or Mode 1 on welcome).
     if (modalSelect) {
-      modalSelect.value = String(state.mode?.count || 1);
+      const modes = window.Tarot52ReadingModes || {};
+      const activeKey = Object.keys(modes).find((k) => modes[k] === state.mode) ?? '1';
+      modalSelect.value = activeKey;
     }
     lastFocusedBeforeModal = document.activeElement;
     modalBackdrop.hidden = false;
@@ -1014,17 +1054,18 @@ function bootChat(rootEl) {
   });
   if (modalStart) {
     modalStart.addEventListener('click', () => {
-      const count = parseInt(modalSelect?.value || '1', 10);
+      const key = parseInt(modalSelect?.value ?? '1', 10);
+      const modeKey = Number.isFinite(key) ? key : 1;
       const wasWelcome = modalPurpose === 'welcome';
       closeModal();
       resetChatThread();
-      writeSessionValue(SESSION_MODE_KEY, count);
+      writeSessionValue(SESSION_MODE_KEY, modeKey);
       // Always collapse chat back to fullscreen so the user starts focused on the chat.
       applyCollapsedState(true);
       // Welcome: trigger the same greeting as the original 'initial' boot.
       // New chat mid-session: post the 'New spread ready' message.
       window.dispatchEvent(new CustomEvent('tarot52:newsession', {
-        detail: { count, reason: wasWelcome ? 'initial' : 'newspread' },
+        detail: { count: modeKey, reason: wasWelcome ? 'initial' : 'newspread' },
       }));
     });
   }
@@ -1080,13 +1121,24 @@ function bootChat(rootEl) {
   window.addEventListener('tarot52:carddrawn', (e) => {
     state.cards = e.detail.cards || [];
     const { card, remaining } = e.detail;
-    const positionLabel = state.mode.count === 1 ? '' : `${card.positionName}: `;
+    const isInfinity = !isFinite(state.mode.count);
+    const positionLabel = (!isInfinity && state.mode.count === 1) ? '' : `${card.positionName}: `;
     appendMessage(
       'assistant',
       `${positionLabel}${card.name} - ${card.term}.${remaining ? ` ${remaining} to draw.` : ''}`,
       'meta',
       { leading: buildMiniCard(card) }
     );
+
+    if (isInfinity) {
+      // Each draw triggers a fresh AI response synthesizing all cards drawn so far.
+      // Mark reading active so follow-up messages go through answerFollowUp.
+      if (!state.readingComplete) {
+        state.readingComplete = true;
+        setPlaceholder();
+      }
+      answerInfinityDraw();
+    }
   });
 
   window.addEventListener('tarot52:readingcomplete', (e) => {

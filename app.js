@@ -56,7 +56,7 @@ const TAROT_RANK_NAMES = {
 // metadata about each card slot and reinforce the system prompt's intent.
 // ---------------------------------------------------------------------------
 
-const SHARED_PREAMBLE = [
+const PREAMBLE_BASE = [
   'You are Tarot 52, a reflective reading assistant working from a 52-card poker deck mapped onto the Rider-Waite Smith Minor Arcana. You are not predicting the future. You are offering a structured symbolic frame the querent can think against.',
   'Source material: each card arrives with a poker name (e.g. "Ace of Clubs"), a "term" (single-word distillation), and background symbolism to inform interpretation. Use only the poker name and the term in your response. Do not mention the Rider-Waite Smith equivalent name, do not say "Ace of Wands" or "Three of Cups" or any other tarot card name. Do not quote, paraphrase, or surface the background symbolism — use it silently to inform what you say, then set it aside. The querent is playing with a poker deck; keep the language in that frame.',
   'Tone: reflective, grounded, conversational. Speak directly to the querent in second person. Avoid oracular cliche ("the cards reveal...", "the universe whispers..."). Avoid hedging into uselessness.',
@@ -64,9 +64,15 @@ const SHARED_PREAMBLE = [
   'Respect the question: the querent\'s inquiry is the spine of the reading. Cards illuminate the question; they do not redirect it. Stay anchored to what was actually asked.',
   'Astrology context: if the querent supplies sun, moon, or rising signs, weave them in only when relevant as supporting color; never predict from astrology, force astrology onto an unrelated question, or let it become the primary lens. The cards remain the main frame. If no astrology profile is present, do not mention astrology or ask for signs.',
   'Follow-up posture: leave room for the querent to push back or ask for alternate readings of the same cards. Do not over-close.',
-  'Single draw constraint: the cards drawn at the start of the session are the only cards available for this conversation. Do not suggest, invite, propose, or hint that the querent could draw more cards, pull additional cards, do another spread, clarify with a new draw, or re-draw. There is no mechanism for a second draw within a session — starting a new reading requires the querent to begin a new session via the New button, and that is their decision to make unprompted. Work entirely within the cards already on the table; if the question outgrows them, deepen the interpretation rather than reaching for more cards.',
-  'Phase-aware structure: the mode-specific construction guidance (naming cards up front, walking the spread, tracing the arc, etc.) applies to the INITIAL reading only. On follow-up turns, the querent has already seen the cards and the opening reading; do not restate card names, do not re-walk the spread, do not reintroduce positions or recap the framing. Answer the follow-up question directly, referring to specific cards by name only when a particular card is genuinely load-bearing for that answer. Treat follow-ups like normal conversation that happens to be informed by the cards already on the table.',
 ].join(' ');
+
+const SINGLE_DRAW_CONSTRAINT = 'Single draw constraint: the cards drawn at the start of the session are the only cards available for this conversation. Do not suggest, invite, propose, or hint that the querent could draw more cards, pull additional cards, do another spread, clarify with a new draw, or re-draw. There is no mechanism for a second draw within a session — starting a new reading requires the querent to begin a new session via the New button, and that is their decision to make unprompted. Work entirely within the cards already on the table; if the question outgrows them, deepen the interpretation rather than reaching for more cards.';
+
+const PHASE_AWARE_STRUCTURE = 'Phase-aware structure: the mode-specific construction guidance (naming cards up front, walking the spread, tracing the arc, etc.) applies to the INITIAL reading only. On follow-up turns, the querent has already seen the cards and the opening reading; do not restate card names, do not re-walk the spread, do not reintroduce positions or recap the framing. Answer the follow-up question directly, referring to specific cards by name only when a particular card is genuinely load-bearing for that answer. Treat follow-ups like normal conversation that happens to be informed by the cards already on the table.';
+
+const SHARED_PREAMBLE = `${PREAMBLE_BASE} ${SINGLE_DRAW_CONSTRAINT} ${PHASE_AWARE_STRUCTURE}`;
+
+const INFINITY_PREAMBLE = `${PREAMBLE_BASE} ${PHASE_AWARE_STRUCTURE}`;
 
 const STYLE_GUIDE = [
   'Respond how the question needs, not by formula. Some answers land in one sentence. Some need multiple paragraphs. Some want a list. Let the content shape the form.',
@@ -78,11 +84,28 @@ const STYLE_GUIDE = [
   'Cut waste: avoid filler phrases that add no meaning ("It\'s worth noting that", "In my opinion", "Some would say"). Every sentence should earn its place.',
 ].join(' ');
 
-function composeSystemPrompt(modeBriefing) {
-  return `${SHARED_PREAMBLE}\n\n${modeBriefing}\n\n${STYLE_GUIDE}`;
+function composeSystemPrompt(modeBriefing, preamble = SHARED_PREAMBLE) {
+  return `${preamble}\n\n${modeBriefing}\n\n${STYLE_GUIDE}`;
 }
 
 const READING_MODES = {
+  0: {
+    count: Infinity,
+    label: 'Infinity',
+    shortLabel: '∞ open draw',
+    intro: 'Draw as many cards as you like. Each card appears in the chat and is woven into the reading as the conversation unfolds.',
+    positions: [],
+    systemPrompt: composeSystemPrompt([
+      'Mode: Infinity — open-ended draw.',
+      'Interpretive logic: the querent draws cards one at a time, in any quantity, over the course of the conversation. Each card arrives as a new layer of context. Treat the full set of drawn cards as an evolving tableau — not a fixed spread with named positions, but an accumulating field of symbols.',
+      'Cards are labeled in draw order (Card 1, Card 2, etc.) as the only positional structure. There are no predefined position meanings; draw order itself is the only structural signal, and even that is loose.',
+      'How to construct each response:',
+      '(a) After each new card draw, respond with a brief observation — one to three sentences — that acknowledges what the new card adds to the current field. Do not recap all previous cards in full; reference earlier cards only when the new card creates a genuine tension or resonance with one.',
+      '(b) When the querent sends a message (question or follow-up), respond directly to that message, drawing on the full accumulated set of cards as shared context. The accumulated cards are background texture, not a formal spread to re-read from scratch each time.',
+      '(c) Do not suggest that more cards are needed or that the querent should draw. The querent controls the draw entirely.',
+      '(d) Do not attempt to frame the accumulating cards into a named spread structure (Celtic Cross, etc.) unless the querent explicitly asks.',
+    ].join(' '), INFINITY_PREAMBLE),
+  },
   1: {
     count: 1,
     label: 'General Insight',
@@ -256,10 +279,10 @@ function getCardPayload(rankIdx, suitIdx, positionIndex = 0, mode = getReadingMo
   const rank = RANKS[rankIdx];
   const suit = SUITS[suitIdx];
   const tarotRank = TAROT_RANK_NAMES[rank] || rank;
-  const position = mode.positions[positionIndex] || {
-    name: `Card ${positionIndex + 1}`,
-    prompt: 'Read this card in the order it was drawn.',
-  };
+  const isInfinity = !isFinite(mode.count);
+  const position = isInfinity
+    ? { name: `Card ${positionIndex + 1}`, prompt: 'Read this card in draw order as a new layer of context added to the accumulating field.' }
+    : (mode.positions[positionIndex] || { name: `Card ${positionIndex + 1}`, prompt: 'Read this card in the order it was drawn.' });
 
   return {
     rank,
@@ -320,6 +343,7 @@ function initTarotSpread(spreadEl, readingEl, mode) {
   const hand = shuffleDeck();
   const flipped = [];
   const limit = mode.count;
+  const isInfinity = !isFinite(limit);
   let inquiryReady = false;
 
   spreadEl.innerHTML = '';
@@ -328,7 +352,7 @@ function initTarotSpread(spreadEl, readingEl, mode) {
   const renderReading = () => {
     if (flipped.length === 0) {
       readingEl.innerHTML = inquiryReady
-        ? `<p class="reading-prompt">Choose ${limit === 1 ? 'a card' : `${limit} cards`} for your ${mode.label} reading.</p>`
+        ? `<p class="reading-prompt">${isInfinity ? 'Draw cards freely — each one joins the reading as you go.' : `Choose ${limit === 1 ? 'a card' : `${limit} cards`} for your ${mode.label} reading.`}</p>`
         : `<p class="reading-prompt">Type your inquiry in the chat before drawing cards.</p>`;
       return;
     }
@@ -342,7 +366,7 @@ function initTarotSpread(spreadEl, readingEl, mode) {
         </div>
       `;
     }).join('');
-    const heading = flipped.length < limit
+    const heading = !isInfinity && flipped.length < limit
       ? `<p class="reading-prompt">${flipped.length} of ${limit} drawn.</p>`
       : '';
     readingEl.innerHTML = heading + `<div class="reading-list">${rows}</div>`;
@@ -357,7 +381,7 @@ function initTarotSpread(spreadEl, readingEl, mode) {
         return;
       }
       if (card.classList.contains('flipped')) return;
-      if (flipped.length >= limit) return;
+      if (!isInfinity && flipped.length >= limit) return;
 
       card.classList.add('flipped', 'selected');
       card.setAttribute('aria-label', `${RANKS[r]} of ${SUITS[s].name}`);
@@ -367,10 +391,10 @@ function initTarotSpread(spreadEl, readingEl, mode) {
         card: payload,
         cards: flipped.slice(),
         mode,
-        remaining: Math.max(0, limit - flipped.length),
+        remaining: isInfinity ? null : Math.max(0, limit - flipped.length),
       });
 
-      if (flipped.length >= limit) {
+      if (!isInfinity && flipped.length >= limit) {
         spreadEl.querySelectorAll('.card-3d:not(.flipped)').forEach(c => c.classList.add('dimmed'));
         dispatchTarotEvent('readingcomplete', {
           mode,
