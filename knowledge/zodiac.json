@@ -1,0 +1,106 @@
+{
+  "signs": {
+    "Aries": {
+      "element": "Fire",
+      "sun": "The first sign of the zodiac, ruled by action planet Mars. Can motivate themselves to face fears and blow past hesitation.",
+      "moon": "Emotionally responsive and impulsive at times, leading with fiery passions over logic or reason.",
+      "rising": "Known as the go-getters of the zodiac. Don't let anything stand in their way of achieving personal goals."
+    },
+    "Taurus": {
+      "element": "Earth",
+      "sun": "Drawn to a creative, indulgent lifestyle. Stubborn, loyal, and grounded. Ruled by Venus.",
+      "moon": "Delight in earthly pleasures and seek out emotional security.",
+      "rising": "Exude grace and sophistication, handling business with a sweet disposition."
+    },
+    "Gemini": {
+      "element": "Air",
+      "sun": "Chatty and talkative, in-the-know on news and gossip. Dualistic nature allows multiple perspectives.",
+      "moon": "Ruled by Mercury, enjoy discussing complex feelings with others for mindful emotional clarity.",
+      "rising": "Quick-witted, fast communicators, always looking for unique ways to express themselves."
+    },
+    "Cancer": {
+      "element": "Water",
+      "sun": "Ruled by the Moon. Emotionally mature, intuitive, sensitive, and artistic. Guided by tender, loving, protective hearts.",
+      "moon": "Emotions have no limits or restraints. Leads to sweetness, kindness, emotional awareness and responsibility.",
+      "rising": "Tend to wear their hearts on their sleeves and take care of those they love."
+    },
+    "Leo": {
+      "element": "Fire",
+      "sun": "Ruled by the Sun. All about ego, will, and character. Creative, playful, and bold.",
+      "moon": "Possessing inner warmth, beyond generous. Shine their light onto those they care about.",
+      "rising": "Radiate positivity and charm. Confident, friendly, outgoing, and strong performers."
+    },
+    "Virgo": {
+      "element": "Earth",
+      "sun": "Governed by Mercury. Thinkers of the zodiac. Process information with diligence and use facts to solve problems.",
+      "moon": "Use calm nature to gain deep clarity on matters through a kind but reasonable lens.",
+      "rising": "Fact-finders and checkers of the zodiac. Fair-minded and slow to anger."
+    },
+    "Libra": {
+      "element": "Air",
+      "sun": "Ruled by the airy part of Venus. Bon vivants, critical, artistic, and forever stylish.",
+      "moon": "Relationship-oriented. May base decisions on how they are viewed by others.",
+      "rising": "Value balance in life, preferring things to be even-keeled and civil."
+    },
+    "Scorpio": {
+      "element": "Water",
+      "sun": "Ruled by Mars and Pluto. Intense, mysterious, and ever-evolving.",
+      "moon": "Brooding nature that exudes passion. Loyal and unconditional in love once trust is won.",
+      "rising": "Ooze magnetism and dynamism. Not known to back away from a challenge."
+    },
+    "Sagittarius": {
+      "element": "Fire",
+      "sun": "Governed by Jupiter. Free-spirited, globe-trotting, philosophical mindset with a wild streak.",
+      "moon": "Considered lucky placement bringing excitement, adventure, and abundance. Can be defensive at times.",
+      "rising": "Jovial, optimistic, and full of energy. Sparkle with confidence."
+    },
+    "Capricorn": {
+      "element": "Earth",
+      "sun": "Ruled by Saturn. Work hard toward advancing themselves in earthly matters.",
+      "moon": "Reflective and contemplative, working to build a better foundation with those they care about.",
+      "rising": "Known for diligence and effort when attaining success and prosperity."
+    },
+    "Aquarius": {
+      "element": "Air",
+      "sun": "Ruled by Saturn and Uranus. Seek unique ways to problem-solve and approach life. Intellectual and innovative.",
+      "moon": "Integrates logic with sentimentality to attain deep understanding of inner life.",
+      "rising": "Can speak lucidly on many topics, using lofty knowledge to charm crowds and solve problems."
+    },
+    "Pisces": {
+      "element": "Water",
+      "sun": "Ruled by Jupiter and Neptune. Sentimental, intuitive, imaginative, and dreamy.",
+      "moon": "Hyper-attuned to the needs and emotions of others. Likely to predict what's on your mind.",
+      "rising": "Commits fully to their beliefs and has an active imagination."
+    }
+  },
+  "elements": {
+    "Fire": {
+      "signs": ["Aries", "Leo", "Sagittarius"],
+      "traits": ["Bold", "Spirited", "Passionate", "Bright", "Artistic", "Intense", "Confident", "Brave", "Independent", "Optimistic"],
+      "relationships": "Adventurous and energetic partnerships filled with passion. Not scared of conflict and may find debate exciting. Need a lot of attention and create engagement. Cultivate community through group projects where they take the lead.",
+      "values": ["Passion", "Adventure", "Humor", "Full participation in life", "Courage", "Risk-taking"],
+      "self_care": "Impromptu creativity, competitive sports, fast walks, dancing, celebrating. Thrive beside a campfire or candle flame."
+    },
+    "Earth": {
+      "signs": ["Taurus", "Virgo", "Capricorn"],
+      "traits": ["Grounded", "Cultivated", "Practical", "Detail-oriented", "Steady", "Reliable", "Level-headed", "Sensual"],
+      "relationships": "Built on mutual respect and steady realism. Follow-through matters greatly. Take care of others but need nurturing in return. Keep friend groups and work cohorts on task and focused.",
+      "values": ["Security", "Stability", "Reliability", "Money", "Success", "Prestige", "Sustainability", "Classics that endure"],
+      "self_care": "Gardening, walking barefoot on grass, getting hands in the dirt. Little luxuries like massages, gourmet food and finding deals."
+    },
+    "Air": {
+      "signs": ["Gemini", "Libra", "Aquarius"],
+      "traits": ["Witty", "Social", "Free-spirited", "Intellectual", "Flighty", "Curious", "Open-minded", "Imaginative"],
+      "relationships": "Find challenges the most interesting aspect of relationships. Wooed by stimulating conversation and curious partners. Need freedom to change their minds. Love parties and working for the greater good.",
+      "values": ["People and ideas", "Harmony", "Mental stimulation", "Change", "Flow", "Functionality", "Meaningful connections"],
+      "self_care": "Therapy or talking things through, puzzles, documentaries, learning new topics, reading. Sitting outside in a cool breeze or listening to music."
+    },
+    "Water": {
+      "signs": ["Cancer", "Scorpio", "Pisces"],
+      "traits": ["Imaginative", "Emotional", "Intuitive", "Empathetic", "Nurturing", "Sensitive", "Deep", "Intense"],
+      "relationships": "Naturally empathetic and nurturing. Form deep connections easily. Strong intuitive sense of others' emotional needs. Homebodies who crave closeness and reassurance of care.",
+      "values": ["Safety", "Promises kept", "Beauty", "Art", "Music", "Dance", "Family", "Pets"],
+      "self_care": "Setting boundaries, blocking off alone time, hot baths, quiet time, being with favorite people. Swimming or spending time near water."
+    }
+  }
+}

@@ -27,6 +27,20 @@
       aria-controls="newChatModal"
       title="Start a new chat"
     >New</button>
+    <button
+      type="button"
+      class="chat-profile-btn"
+      id="chatProfileBtn"
+      aria-haspopup="dialog"
+      aria-controls="profileModal"
+      aria-label="Birth chart profile"
+      title="Birth chart profile"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="8" r="3.5"></circle>
+        <path d="M5 20a7 7 0 0 1 14 0"></path>
+      </svg>
+    </button>
   </header>
 
   <div class="chat-thread" id="chatThread" role="log" aria-live="polite" aria-label="Chat messages">
@@ -77,6 +91,45 @@
       </label>
       <div class="modal-actions">
         <button type="button" class="btn-primary" id="newChatStartBtn">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal-backdrop"
+    id="profileModalBackdrop"
+    hidden
+    role="presentation"
+  >
+    <div
+      class="modal"
+      id="profileModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profileModalTitle"
+      aria-describedby="profileModalDesc"
+    >
+      <h3 class="modal-title" id="profileModalTitle">Birth chart profile</h3>
+      <p class="modal-desc" id="profileModalDesc">
+        Optionally add your sun, moon, and rising signs. They can inform readings when they are relevant.
+      </p>
+      <div class="profile-sign-grid">
+        <label class="modal-field">
+          <span class="modal-field-label">Sun</span>
+          <select id="profileSunSelect" aria-label="Sun sign"></select>
+        </label>
+        <label class="modal-field">
+          <span class="modal-field-label">Moon</span>
+          <select id="profileMoonSelect" aria-label="Moon sign"></select>
+        </label>
+        <label class="modal-field">
+          <span class="modal-field-label">Rising</span>
+          <select id="profileRisingSelect" aria-label="Rising sign"></select>
+        </label>
+      </div>
+      <div class="modal-actions modal-actions-split">
+        <button type="button" class="btn-secondary" id="profileClearBtn">Clear</button>
+        <button type="button" class="btn-primary" id="profileSaveBtn">Save</button>
       </div>
     </div>
   </div>

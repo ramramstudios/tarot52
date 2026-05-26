@@ -43,10 +43,47 @@ function compactKnowledgeDocument(doc) {
   ].filter(Boolean).join('\n');
 }
 
+function compactAstrologyProfile(profile) {
+  if (!profile || typeof profile !== 'object') return '';
+  const lines = ['sun', 'moon', 'rising']
+    .filter((key) => typeof profile[key] === 'string' && profile[key].trim())
+    .map((key) => `${key}: ${profile[key].trim()}`);
+  return lines.join('\n');
+}
+
+function compactAstrologyContext(context) {
+  const placements = context && typeof context === 'object' ? context.placements : null;
+  if (!placements || typeof placements !== 'object') return '';
+
+  return ['sun', 'moon', 'rising'].map((slot) => {
+    const placement = placements[slot];
+    if (!placement || typeof placement !== 'object') return '';
+
+    const elementContext = placement.elementContext && typeof placement.elementContext === 'object'
+      ? placement.elementContext
+      : {};
+    return [
+      `${slot}: ${placement.sign || ''}`,
+      placement.element ? `${slot} element: ${placement.element}` : '',
+      placement.meaning ? `${slot} meaning: ${placement.meaning}` : '',
+      Array.isArray(elementContext.traits) && elementContext.traits.length
+        ? `${placement.element || 'Element'} traits: ${elementContext.traits.join(', ')}`
+        : '',
+      elementContext.relationships ? `${placement.element || 'Element'} relationship style: ${elementContext.relationships}` : '',
+      Array.isArray(elementContext.values) && elementContext.values.length
+        ? `${placement.element || 'Element'} values: ${elementContext.values.join(', ')}`
+        : '',
+      elementContext.selfCare ? `${placement.element || 'Element'} self-care: ${elementContext.selfCare}` : '',
+    ].filter(Boolean).join('\n');
+  }).filter(Boolean).join('\n\n');
+}
+
 function buildInput(payload) {
   const cards = Array.isArray(payload.cards) ? payload.cards : [];
   const followUps = Array.isArray(payload.followUps) ? payload.followUps : [];
   const knowledgeBase = Array.isArray(payload.knowledgeBase) ? payload.knowledgeBase : [];
+  const astrologyProfile = compactAstrologyContext(payload.astrologyContext)
+    || compactAstrologyProfile(payload.astrologyProfile);
   const phase = payload.phase === 'followup' ? 'follow-up' : 'initial reading';
 
   return [
@@ -58,6 +95,10 @@ function buildInput(payload) {
     '',
     'Cards drawn in order:',
     cards.map(compactCard).join('\n\n'),
+    '',
+    astrologyProfile
+      ? `Querent's birth chart (use as additional interpretive context, not as the primary lens):\n${astrologyProfile}`
+      : '',
     '',
     knowledgeBase.length
       ? `Knowledge base context (use silently to enrich the reading; do not quote or cite unless asked):\n${knowledgeBase.map(compactKnowledgeDocument).join('\n\n---\n\n')}`
@@ -96,6 +137,8 @@ function summarizePayload(payload) {
   const cards = Array.isArray(payload.cards) ? payload.cards : [];
   const knowledgeBase = Array.isArray(payload.knowledgeBase) ? payload.knowledgeBase : [];
   const followUps = Array.isArray(payload.followUps) ? payload.followUps : [];
+  const astrologyProfile = compactAstrologyContext(payload.astrologyContext)
+    || compactAstrologyProfile(payload.astrologyProfile);
 
   return {
     phase: payload.phase || 'initial',
@@ -103,6 +146,8 @@ function summarizePayload(payload) {
     cardCount: cards.length,
     knowledgeDocCount: knowledgeBase.length,
     followUpCount: followUps.length,
+    hasAstrologyProfile: Boolean(astrologyProfile),
+    hasAstrologyContext: Boolean(compactAstrologyContext(payload.astrologyContext)),
   };
 }
 
@@ -117,6 +162,8 @@ function logRequestSummary(payload, model, instructions, input) {
     'cards.length': cards.length,
     cards: cards.map((card) => `${card.name || 'Unknown'}/${card.positionName || 'Unpositioned'}`),
     knowledgeBase: knowledgeBase.map((doc) => doc.title || doc.path || 'Untitled knowledge document'),
+    hasAstrologyProfile: Boolean(compactAstrologyProfile(payload.astrologyProfile)),
+    hasAstrologyContext: Boolean(compactAstrologyContext(payload.astrologyContext)),
     'userPrompt.length': String(payload.userPrompt || '').length,
     'instructions.length': instructions.length,
     'input.length': input.length,

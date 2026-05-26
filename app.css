@@ -247,10 +247,10 @@ body.resizing * {
   top: 10px;
 }
 
-/* "New chat" button at the right end of the chat header */
-.chat-new-btn {
+/* Header action buttons at the right end of the chat header */
+.chat-new-btn,
+.chat-profile-btn {
   flex-shrink: 0;
-  padding: 0.4rem 0.85rem;
   border-radius: 8px;
   border: 1px solid var(--border-md);
   background: var(--surface-2);
@@ -261,11 +261,45 @@ body.resizing * {
   cursor: pointer;
   transition: color var(--ease), border-color var(--ease), background var(--ease);
 }
-.chat-new-btn:hover {
+.chat-new-btn {
+  padding: 0.4rem 0.85rem;
+}
+.chat-profile-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-profile-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chat-profile-btn.has-profile::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 0 0 2px var(--surface-2);
+}
+.chat-new-btn:hover,
+.chat-profile-btn:hover {
   color: var(--purple);
   border-color: rgba(139, 92, 246, 0.5);
 }
-.chat-new-btn:focus-visible {
+.chat-new-btn:focus-visible,
+.chat-profile-btn:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
@@ -359,10 +393,24 @@ body.resizing * {
 .modal-actions {
   display: flex;
   justify-content: stretch;
+  gap: 0.6rem;
 }
-.modal-actions .btn-primary {
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
   flex: 1;
   min-height: 42px;
+}
+.profile-sign-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.profile-sign-grid .modal-field {
+  margin-bottom: 1.25rem;
+}
+.modal-actions-split .btn-secondary {
+  flex: 0 0 auto;
+  min-width: 96px;
 }
 
 .chat-title {
@@ -858,6 +906,26 @@ body.resizing * {
 .btn-primary:hover  { filter: brightness(1.15); box-shadow: var(--shadow-md); }
 .btn-primary:active { transform: translateY(1px); }
 .btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.btn-secondary {
+  display: inline-block;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease), background var(--ease), transform 0.06s ease;
+  letter-spacing: 0.01em;
+}
+.btn-secondary:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+.btn-secondary:active { transform: translateY(1px); }
+.btn-secondary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .btn-compact {
   flex-shrink: 0;
   min-height: 36px;
@@ -1175,6 +1243,7 @@ body.resizing * {
     backdrop-filter: blur(10px);
   }
   body.app-shell .chat-header .pane-toggle,
+  body.app-shell .chat-profile-btn,
   body.app-shell .chat-new-btn {
     min-width: 44px;
     min-height: var(--mobile-topbar-content-height);
@@ -1228,6 +1297,10 @@ body.resizing * {
 }
 
 @media (max-width: 420px) {
+  .profile-sign-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
   body.app-shell .layout {
     grid-template-rows: minmax(0, 1fr) 0;
   }

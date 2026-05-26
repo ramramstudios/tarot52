@@ -6,6 +6,21 @@
 
 const SESSION_MODE_KEY = 'tarot52.activeModeCount';
 const SESSION_COLLAPSED_KEY = 'tarot52.sidebarCollapsed';
+const ASTROLOGY_PROFILE_KEY = 'tarot52.astrologyProfile';
+const ZODIAC_SIGNS = [
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
+];
 
 function readSessionInt(key) {
   try {
@@ -33,6 +48,52 @@ function writeSessionValue(key, value) {
   } catch {
     // Ignore private browsing / storage-denied cases; the app still works.
   }
+}
+
+function normalizeAstrologyProfile(profile = {}) {
+  const normalized = {};
+  ['sun', 'moon', 'rising'].forEach((key) => {
+    const value = typeof profile[key] === 'string' ? profile[key] : '';
+    if (ZODIAC_SIGNS.includes(value)) normalized[key] = value;
+  });
+  return normalized;
+}
+
+function hasAstrologyProfile(profile) {
+  return Boolean(profile && Object.keys(profile).length);
+}
+
+function readAstrologyProfile() {
+  try {
+    const raw = localStorage.getItem(ASTROLOGY_PROFILE_KEY);
+    if (!raw) return {};
+    return normalizeAstrologyProfile(JSON.parse(raw));
+  } catch {
+    return {};
+  }
+}
+
+function writeAstrologyProfile(profile) {
+  const normalized = normalizeAstrologyProfile(profile);
+  try {
+    if (hasAstrologyProfile(normalized)) {
+      localStorage.setItem(ASTROLOGY_PROFILE_KEY, JSON.stringify(normalized));
+    } else {
+      localStorage.removeItem(ASTROLOGY_PROFILE_KEY);
+    }
+  } catch {
+    // Ignore storage-denied cases; the in-memory profile still works.
+  }
+  return normalized;
+}
+
+function clearAstrologyProfile() {
+  try {
+    localStorage.removeItem(ASTROLOGY_PROFILE_KEY);
+  } catch {
+    // Ignore storage-denied cases.
+  }
+  return {};
 }
 
 async function loadLoreIndex() {
@@ -65,6 +126,43 @@ async function loadKnowledgeBase() {
   }));
 
   return loaded.filter(Boolean);
+}
+
+async function loadZodiacKnowledge() {
+  const res = await fetch('knowledge/zodiac.json');
+  if (!res.ok) throw new Error(`Failed to load zodiac.json: ${res.status}`);
+  const data = await res.json();
+  return {
+    signs: data && typeof data.signs === 'object' ? data.signs : {},
+    elements: data && typeof data.elements === 'object' ? data.elements : {},
+  };
+}
+
+function buildAstrologyContext(profile, zodiacKnowledge) {
+  if (!hasAstrologyProfile(profile) || !zodiacKnowledge) return null;
+
+  const placements = {};
+  ['sun', 'moon', 'rising'].forEach((slot) => {
+    const sign = profile[slot];
+    const signData = sign && zodiacKnowledge.signs?.[sign];
+    if (!signData) return;
+
+    const element = signData.element || '';
+    const elementData = element ? zodiacKnowledge.elements?.[element] : null;
+    placements[slot] = {
+      sign,
+      element,
+      meaning: signData[slot] || '',
+      elementContext: elementData ? {
+        traits: Array.isArray(elementData.traits) ? elementData.traits.slice() : [],
+        relationships: elementData.relationships || '',
+        values: Array.isArray(elementData.values) ? elementData.values.slice() : [],
+        selfCare: elementData.self_care || '',
+      } : null,
+    };
+  });
+
+  return Object.keys(placements).length ? { placements } : null;
 }
 
 function firstSentence(text) {
@@ -275,6 +373,17 @@ window.Tarot52Debug = {
     const missingKnowledgeTitles = knowledgeBase
       .map((doc) => doc.title || doc.path)
       .filter((title) => title && !input.includes(title));
+    const astrologyProfile = payload.astrologyProfile || {};
+    const missingAstrologySigns = Object.entries(astrologyProfile)
+      .map(([slot, sign]) => `${slot}: ${sign}`)
+      .filter((line) => !input.includes(line));
+    const astrologyContext = payload.astrologyContext?.placements || {};
+    const missingAstrologyContext = Object.entries(astrologyContext)
+      .flatMap(([slot, placement]) => [
+        placement.element ? `${slot} element: ${placement.element}` : '',
+        placement.meaning || '',
+      ])
+      .filter((value) => value && !input.includes(value));
 
     const checks = [
       logDebugCheck('instructions match payload.systemPrompt', echo.instructions === (payload.systemPrompt || '')),
@@ -293,6 +402,16 @@ window.Tarot52Debug = {
         'input contains every knowledge doc title',
         missingKnowledgeTitles.length === 0,
         missingKnowledgeTitles.length ? `missing: ${missingKnowledgeTitles.join(', ')}` : ''
+      ),
+      logDebugCheck(
+        'input contains astrology profile when present',
+        !hasAstrologyProfile(astrologyProfile) || missingAstrologySigns.length === 0,
+        missingAstrologySigns.length ? `missing: ${missingAstrologySigns.join(', ')}` : ''
+      ),
+      logDebugCheck(
+        'input contains aligned zodiac context when present',
+        !hasAstrologyProfile(astrologyProfile) || !payload.astrologyContext || missingAstrologyContext.length === 0,
+        missingAstrologyContext.length ? `missing: ${missingAstrologyContext.join(', ')}` : ''
       ),
     ];
 
@@ -396,6 +515,9 @@ function bootChat(rootEl) {
     knowledgeError: null,
     initialReading: '',
     followUps: [],
+    astrologyProfile: readAstrologyProfile(),
+    zodiacKnowledge: null,
+    zodiacError: null,
   };
 
   loadLoreIndex()
@@ -410,6 +532,13 @@ function bootChat(rootEl) {
     .catch((err) => {
       state.knowledgeError = err;
       console.warn('[chat] knowledge base unavailable', err);
+    });
+
+  loadZodiacKnowledge()
+    .then((zodiac) => { state.zodiacKnowledge = zodiac; })
+    .catch((err) => {
+      state.zodiacError = err;
+      console.warn('[chat] zodiac knowledge unavailable', err);
     });
 
   // Auto-grow textarea up to a cap.
@@ -544,7 +673,7 @@ function bootChat(rootEl) {
 
   const createLLMPayload = (phase = 'initial') => {
     const cards = enrichCards(state.cards);
-    return {
+    const payload = {
       phase,
       systemPrompt: buildSystemPromptForPhase(state.mode, phase),
       mode: {
@@ -558,6 +687,12 @@ function bootChat(rootEl) {
       initialReading: phase === 'followup' ? state.initialReading : '',
       followUps: state.followUps.slice(),
     };
+    if (hasAstrologyProfile(state.astrologyProfile)) {
+      payload.astrologyProfile = { ...state.astrologyProfile };
+      const astrologyContext = buildAstrologyContext(state.astrologyProfile, state.zodiacKnowledge);
+      if (astrologyContext) payload.astrologyContext = astrologyContext;
+    }
+    return payload;
   };
 
   const renderMockReading = (payload) => {
@@ -720,6 +855,13 @@ function bootChat(rootEl) {
   const modalDesc     = rootEl.querySelector('#newChatModalDesc');
   const modalSelect   = rootEl.querySelector('#newChatModeSelect');
   const modalStart    = rootEl.querySelector('#newChatStartBtn');
+  const profileBtn    = rootEl.querySelector('#chatProfileBtn');
+  const profileBackdrop = rootEl.querySelector('#profileModalBackdrop');
+  const profileSun    = rootEl.querySelector('#profileSunSelect');
+  const profileMoon   = rootEl.querySelector('#profileMoonSelect');
+  const profileRising = rootEl.querySelector('#profileRisingSelect');
+  const profileSave   = rootEl.querySelector('#profileSaveBtn');
+  const profileClear  = rootEl.querySelector('#profileClearBtn');
 
   let modalPurpose = null; // 'welcome' | 'new' | null
 
@@ -735,6 +877,41 @@ function bootChat(rootEl) {
     });
   };
   populateModeOptions();
+
+  const populateSignSelect = (select) => {
+    if (!select) return;
+    select.innerHTML = '';
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = '— not set —';
+    select.appendChild(empty);
+    ZODIAC_SIGNS.forEach((sign) => {
+      const opt = document.createElement('option');
+      opt.value = sign;
+      opt.textContent = sign;
+      select.appendChild(opt);
+    });
+  };
+
+  const populateProfileOptions = () => {
+    [profileSun, profileMoon, profileRising].forEach(populateSignSelect);
+  };
+  populateProfileOptions();
+
+  const syncProfileButton = () => {
+    if (!profileBtn) return;
+    const isSet = hasAstrologyProfile(state.astrologyProfile);
+    profileBtn.classList.toggle('has-profile', isSet);
+    profileBtn.setAttribute('aria-label', isSet ? 'Birth chart profile set' : 'Birth chart profile');
+    profileBtn.setAttribute('title', isSet ? 'Birth chart profile set' : 'Birth chart profile');
+  };
+
+  const syncProfileSelects = () => {
+    const profile = state.astrologyProfile || {};
+    if (profileSun) profileSun.value = profile.sun || '';
+    if (profileMoon) profileMoon.value = profile.moon || '';
+    if (profileRising) profileRising.value = profile.rising || '';
+  };
 
   const configureModalFor = (purpose) => {
     if (!modalTitle || !modalDesc || !modalStart) return;
@@ -776,6 +953,28 @@ function bootChat(rootEl) {
     }
   };
 
+  let lastFocusedBeforeProfile = null;
+  const openProfileModal = () => {
+    if (!profileBackdrop) return;
+    populateProfileOptions();
+    syncProfileSelects();
+    lastFocusedBeforeProfile = document.activeElement;
+    profileBackdrop.hidden = false;
+    requestAnimationFrame(() => {
+      profileBackdrop.classList.add('is-open');
+      if (profileSun) profileSun.focus();
+    });
+  };
+
+  const closeProfileModal = () => {
+    if (!profileBackdrop) return;
+    profileBackdrop.classList.remove('is-open');
+    profileBackdrop.hidden = true;
+    if (lastFocusedBeforeProfile && typeof lastFocusedBeforeProfile.focus === 'function') {
+      lastFocusedBeforeProfile.focus();
+    }
+  };
+
   const resetChatThread = () => {
     thread.innerHTML = '';
     const empty = document.createElement('div');
@@ -792,16 +991,25 @@ function bootChat(rootEl) {
   };
 
   if (newBtn) newBtn.addEventListener('click', () => openModal('new'));
+  if (profileBtn) profileBtn.addEventListener('click', openProfileModal);
   if (modalBackdrop) {
     modalBackdrop.addEventListener('click', (e) => {
       // Welcome modal cannot be dismissed by clicking the backdrop.
       if (e.target === modalBackdrop && modalPurpose === 'new') closeModal();
     });
   }
+  if (profileBackdrop) {
+    profileBackdrop.addEventListener('click', (e) => {
+      if (e.target === profileBackdrop) closeProfileModal();
+    });
+  }
   document.addEventListener('keydown', (e) => {
     // Welcome modal cannot be dismissed with Escape.
     if (e.key === 'Escape' && modalBackdrop && !modalBackdrop.hidden && modalPurpose === 'new') {
       closeModal();
+    }
+    if (e.key === 'Escape' && profileBackdrop && !profileBackdrop.hidden) {
+      closeProfileModal();
     }
   });
   if (modalStart) {
@@ -818,6 +1026,25 @@ function bootChat(rootEl) {
       window.dispatchEvent(new CustomEvent('tarot52:newsession', {
         detail: { count, reason: wasWelcome ? 'initial' : 'newspread' },
       }));
+    });
+  }
+  if (profileSave) {
+    profileSave.addEventListener('click', () => {
+      state.astrologyProfile = writeAstrologyProfile({
+        sun: profileSun?.value || null,
+        moon: profileMoon?.value || null,
+        rising: profileRising?.value || null,
+      });
+      syncProfileButton();
+      closeProfileModal();
+    });
+  }
+  if (profileClear) {
+    profileClear.addEventListener('click', () => {
+      state.astrologyProfile = clearAstrologyProfile();
+      syncProfileSelects();
+      syncProfileButton();
+      closeProfileModal();
     });
   }
 
@@ -870,6 +1097,7 @@ function bootChat(rootEl) {
 
   setPlaceholder();
   syncComposerCopyButton();
+  syncProfileButton();
 }
 
 window.bootChat = bootChat;
