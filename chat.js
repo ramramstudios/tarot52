@@ -554,25 +554,10 @@ function bootChat(rootEl) {
 
   // Auto-grow textarea up to a cap.
   const MAX_ROWS_PX = 200;
-  const composerCopyButton = createCopyButton({
-    label: 'Copy input',
-    title: 'Copy input',
-    getText: () => input.value,
-  });
-  composerCopyButton.classList.add('chat-composer-copy');
-  composerActions.appendChild(composerCopyButton);
-
-  const syncComposerCopyButton = () => {
-    const hasText = input.value.trim().length > 0;
-    composerActions.hidden = !hasText;
-    composerCopyButton.hidden = !hasText;
-    composerCopyButton.disabled = !hasText;
-  };
 
   const autoGrow = () => {
     input.style.height = 'auto';
     input.style.height = Math.min(input.scrollHeight, MAX_ROWS_PX) + 'px';
-    syncComposerCopyButton();
   };
   input.addEventListener('input', autoGrow);
 
@@ -1182,7 +1167,6 @@ function bootChat(rootEl) {
   });
 
   setPlaceholder();
-  syncComposerCopyButton();
   syncProfileButton();
 }
 
