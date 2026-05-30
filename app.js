@@ -313,11 +313,16 @@ function dispatchTarotEvent(name, detail) {
 }
 
 /** Build a single 3-D card element */
-function buildCard3D(rankIdx, suitIdx) {
+function buildCard3D(rankIdx, suitIdx, idx = 0) {
   const rank = RANKS[rankIdx];
   const displayRank = getCardDisplayRank(rank);
   const suit = SUITS[suitIdx];
   const meaning = MEANINGS[rankIdx][suitIdx];
+
+  // Checkerboard the deck back colors by grid position (13 cols × 4 rows).
+  const col = idx % 13;
+  const row = Math.floor(idx / 13);
+  const backColor = (col + row) % 2 === 0 ? 'back-red' : 'back-blue';
 
   const wrapper = document.createElement('div');
   wrapper.className = 'card-3d';
@@ -330,9 +335,7 @@ function buildCard3D(rankIdx, suitIdx) {
 
   wrapper.innerHTML = `
     <div class="card-inner">
-      <div class="card-face card-back-face">
-        <div class="card-ornament">✦</div>
-      </div>
+      <div class="card-face card-back-face ${backColor}"></div>
       <div class="card-face card-front-face ${suit.cls}">
         <div class="card-corner tl">
           <span class="rank-label">${displayRank}</span>
@@ -383,8 +386,8 @@ function initTarotSpread(spreadEl, readingEl, mode) {
     readingEl.innerHTML = heading + `<div class="reading-list">${rows}</div>`;
   };
 
-  hand.forEach(({ r, s }) => {
-    const card = buildCard3D(r, s);
+  hand.forEach(({ r, s }, idx) => {
+    const card = buildCard3D(r, s, idx);
 
     const flip = () => {
       if (!inquiryReady) {

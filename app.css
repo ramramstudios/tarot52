@@ -737,34 +737,18 @@ body.resizing * {
   overflow: hidden;
 }
 
-/* BACK — deep purple */
+/* BACK — classic Bicycle Rider Back, red or blue */
 .card-back-face {
-  background: radial-gradient(ellipse at 40% 35%, #2a0d5e 0%, #0d0618 100%);
-  border: 1.5px solid rgba(180, 130, 255, 0.22);
-  box-shadow: inset 0 0 20px rgba(120, 60, 220, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: #f5f0e8;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
   transform: translateZ(1px); /* Firefox: separate planes so backface-visibility culls correctly */
 }
-.card-back-face::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(180, 130, 255, 0.14);
-  border-radius: 4px;
-  pointer-events: none;
-}
-.card-ornament {
-  font-size: 2rem;
-  color: rgba(200, 160, 255, 0.6);
-  text-shadow: 0 0 20px rgba(160, 100, 255, 0.5), 0 0 50px rgba(100, 40, 200, 0.25);
-  user-select: none;
-  position: relative;
-  z-index: 1;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
+.card-back-face.back-red  { background-image: url('red-back.jpg'); }
+.card-back-face.back-blue { background-image: url('blue-back.jpg'); }
 
 /* FRONT — classic ivory card */
 .card-front-face {
