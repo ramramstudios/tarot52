@@ -43,15 +43,20 @@ function buildRow(card) {
   return tr;
 }
 
-function buildSection(suitName, cards) {
+function buildSection(suitName, cards, suitMeta = {}) {
   const wrap = document.createElement('section');
   wrap.className = 'lore-section';
-  const symbol = SUIT_SYMBOLS[suitName];
+  const symbol = suitMeta.symbol || SUIT_SYMBOLS[suitName];
   const colorCls = SUIT_COLOR_CLASS[suitName];
+  const tarotSuit = suitMeta.tarot || '';
+  const element = suitMeta.element ? suitMeta.element.toLowerCase() : '';
+  const suitLabel = tarotSuit && element
+    ? `${suitName} ↔ ${tarotSuit} (${element})`
+    : suitName;
   wrap.innerHTML = `
     <h2 class="lore-section-title">
       <span class="lore-suit-symbol ${colorCls}">${symbol}</span>
-      <span>${suitName}</span>
+      <span>${suitLabel}</span>
     </h2>
     <table class="lore-table">
       <thead>
@@ -138,7 +143,7 @@ async function render() {
 
   const body = page.querySelector('#loreBody');
   ['Clubs', 'Hearts', 'Spades', 'Diamonds'].forEach(suit => {
-    body.appendChild(buildSection(suit, grouped[suit]));
+    body.appendChild(buildSection(suit, grouped[suit], lore.suits?.[suit]));
   });
 
   const main = document.getElementById('app');
