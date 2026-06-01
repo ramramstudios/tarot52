@@ -264,6 +264,22 @@ function getCardDisplayRank(rank) {
   return CARD_DISPLAY_RANKS[rank] || rank;
 }
 
+/** Inner HTML of a card front face (corners + center suit), shared by the
+ *  spread cards and the reading result previews so they stay identical. */
+function cardFrontFaceHTML(displayRank, symbol) {
+  return `
+    <div class="card-corner tl">
+      <span class="rank-label">${displayRank}</span>
+      <span class="suit-label">${symbol}</span>
+    </div>
+    <div class="card-center-suit">${symbol}</div>
+    <div class="card-corner br" aria-hidden="true">
+      <span class="rank-label">${displayRank}</span>
+      <span class="suit-label">${symbol}</span>
+    </div>
+  `;
+}
+
 function secureRandom(max) {
   const buf = new Uint32Array(1);
   window.crypto.getRandomValues(buf);
@@ -336,17 +352,7 @@ function buildCard3D(rankIdx, suitIdx, idx = 0) {
   wrapper.innerHTML = `
     <div class="card-inner">
       <div class="card-face card-back-face ${backColor}"></div>
-      <div class="card-face card-front-face ${suit.cls}">
-        <div class="card-corner tl">
-          <span class="rank-label">${displayRank}</span>
-          <span class="suit-label">${suit.symbol}</span>
-        </div>
-        <div class="card-center-suit">${suit.symbol}</div>
-        <div class="card-corner br" aria-hidden="true">
-          <span class="rank-label">${displayRank}</span>
-          <span class="suit-label">${suit.symbol}</span>
-        </div>
-      </div>
+      <div class="card-face card-front-face ${suit.cls}">${cardFrontFaceHTML(displayRank, suit.symbol)}</div>
     </div>
   `;
   return wrapper;
@@ -370,13 +376,22 @@ function initTarotSpread(spreadEl, readingEl, mode) {
         : `<p class="reading-prompt">Type your inquiry in the chat before drawing cards.</p>`;
       return;
     }
+    const hasNamedPositions = !isInfinity && Array.isArray(mode.positions) && mode.positions.length > 0;
     const rows = flipped.map((card) => {
+      const displayRank = getCardDisplayRank(card.rank);
+      const position = hasNamedPositions
+        ? `<span class="reading-position">${card.positionName}</span>`
+        : '';
       return `
         <div class="reading-row ${card.colorClass}">
-          <span class="reading-suit-icon">${card.symbol}</span>
-          <span class="reading-position">${card.positionName}</span>
-          <span class="reading-card-name">${card.name}</span>
-          <span class="reading-meaning">${card.term}</span>
+          <div class="reading-card-preview ${card.colorClass}" aria-hidden="true">
+            <div class="card-face card-front-face ${card.colorClass}">${cardFrontFaceHTML(displayRank, card.symbol)}</div>
+          </div>
+          <div class="reading-copy">
+            ${position}
+            <span class="reading-card-name">${card.name}</span>
+          </div>
+          <span class="reading-term">${card.term}</span>
         </div>
       `;
     }).join('');
