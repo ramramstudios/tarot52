@@ -153,6 +153,28 @@ body.resizing * {
   gap: 0.4rem;
   padding: 1rem 0.75rem;
 }
+.pane-sidebar .card-front-face {
+  padding: 4px;
+}
+.pane-sidebar .card-corner {
+  width: 0.82rem;
+  min-height: 0.95rem;
+}
+.pane-sidebar .card-corner.tl {
+  top: 4px;
+  left: 4px;
+}
+.pane-sidebar .card-corner.br {
+  right: 4px;
+  bottom: 4px;
+}
+.pane-sidebar .card-center-suit {
+  font-size: 1.25rem;
+}
+.pane-sidebar .rank-label,
+.pane-sidebar .suit-label {
+  font-size: 0.52rem;
+}
 
 /* ============================================================
    CHAT PANE
@@ -781,10 +803,6 @@ body.resizing * {
 .card-front-face {
   transform: rotateY(180deg) translateZ(1px); /* translateZ separates from back face in Firefox */
   background: #f5f0e8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 6px;
 }
 .card-corner {
@@ -792,13 +810,23 @@ body.resizing * {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 1rem;
+  min-height: 1.15rem;
   line-height: 1.1;
 }
 .card-corner.tl { top: 5px;    left: 6px; }
 .card-corner.br { bottom: 5px; right: 6px; transform: rotate(180deg); }
-.rank-label { font-size: 0.75rem; font-weight: 800; }
-.suit-label  { font-size: 0.7rem;  line-height: 1; }
-.card-center-suit { font-size: 2.2rem; }
+.rank-label { font-size: 0.75rem; font-weight: 800; line-height: 1; }
+.suit-label  { font-size: 0.7rem;  line-height: 0.9; }
+.card-center-suit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.05rem;
+  line-height: 1;
+}
 
 .card-front-face.suit-red   { color: #b91c1c; }
 .card-front-face.suit-black { color: #1c1c1e; }
@@ -1206,8 +1234,20 @@ body.resizing * {
   body.app-shell .pane-sidebar .card-front-face {
     padding: 4px;
   }
+  body.app-shell .pane-sidebar .card-corner {
+    width: 0.78rem;
+    min-height: 0.9rem;
+  }
+  body.app-shell .pane-sidebar .card-corner.tl {
+    top: 4px;
+    left: 4px;
+  }
+  body.app-shell .pane-sidebar .card-corner.br {
+    right: 4px;
+    bottom: 4px;
+  }
   body.app-shell .pane-sidebar .card-center-suit {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
   }
   body.app-shell .pane-sidebar .rank-label,
   body.app-shell .pane-sidebar .suit-label {
