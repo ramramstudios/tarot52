@@ -1268,21 +1268,32 @@ body.resizing * {
   }
   body.app-shell .pane-sidebar .reading-row {
     grid-template-columns: 1.4rem 1fr;
+    grid-template-areas:
+      "position position"
+      "suit card"
+      ". meaning";
     gap: 0.35rem 0.55rem;
     padding: 0.55rem 0.65rem;
+  }
+  body.app-shell .pane-sidebar .reading-suit-icon {
+    grid-area: suit;
+    align-self: center;
   }
   body.app-shell .pane-sidebar .reading-position,
   body.app-shell .pane-sidebar .reading-card-name,
   body.app-shell .pane-sidebar .reading-meaning {
-    grid-column: 2;
+    grid-column: auto;
   }
   body.app-shell .pane-sidebar .reading-position {
+    grid-area: position;
     font-size: 0.66rem;
   }
   body.app-shell .pane-sidebar .reading-card-name {
+    grid-area: card;
     font-size: 0.95rem;
   }
   body.app-shell .pane-sidebar .reading-meaning {
+    grid-area: meaning;
     font-size: 0.86rem;
   }
   body.app-shell .chat-root {
