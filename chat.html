@@ -109,27 +109,59 @@
       aria-labelledby="profileModalTitle"
       aria-describedby="profileModalDesc"
     >
-      <h3 class="modal-title" id="profileModalTitle">Birth chart profile</h3>
+      <div class="modal-header">
+        <button
+          type="button"
+          class="modal-icon-btn modal-icon-btn-left"
+          id="profileHelpBackBtn"
+          aria-label="Back to sign selector"
+          title="Back"
+          hidden
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+        <h3 class="modal-title" id="profileModalTitle">Birth chart profile</h3>
+        <button
+          type="button"
+          class="modal-icon-btn modal-icon-btn-right"
+          id="profileHelpBtn"
+          aria-label="Find your birth chart"
+          title="Find your birth chart"
+        >
+          <span aria-hidden="true">?</span>
+        </button>
+      </div>
       <p class="modal-desc" id="profileModalDesc">
         Optionally add your sun, moon, and rising signs. They can inform readings when they are relevant.
       </p>
-      <div class="profile-sign-grid">
-        <label class="modal-field">
-          <span class="modal-field-label">Sun</span>
-          <select id="profileSunSelect" aria-label="Sun sign"></select>
-        </label>
-        <label class="modal-field">
-          <span class="modal-field-label">Moon</span>
-          <select id="profileMoonSelect" aria-label="Moon sign"></select>
-        </label>
-        <label class="modal-field">
-          <span class="modal-field-label">Rising</span>
-          <select id="profileRisingSelect" aria-label="Rising sign"></select>
-        </label>
+      <div id="profileSelectorView">
+        <div class="profile-sign-grid">
+          <label class="modal-field">
+            <span class="modal-field-label">Sun</span>
+            <select id="profileSunSelect" aria-label="Sun sign"></select>
+          </label>
+          <label class="modal-field">
+            <span class="modal-field-label">Moon</span>
+            <select id="profileMoonSelect" aria-label="Moon sign"></select>
+          </label>
+          <label class="modal-field">
+            <span class="modal-field-label">Rising</span>
+            <select id="profileRisingSelect" aria-label="Rising sign"></select>
+          </label>
+        </div>
+        <div class="modal-actions modal-actions-split">
+          <button type="button" class="btn-secondary" id="profileClearBtn">Clear</button>
+          <button type="button" class="btn-primary" id="profileSaveBtn">Save</button>
+        </div>
       </div>
-      <div class="modal-actions modal-actions-split">
-        <button type="button" class="btn-secondary" id="profileClearBtn">Clear</button>
-        <button type="button" class="btn-primary" id="profileSaveBtn">Save</button>
+      <div class="profile-help-view" id="profileHelpView" hidden>
+        <p class="profile-help-copy">if you don't know your chart, go here</p>
+        <a
+          class="btn-primary profile-chart-link"
+          href="https://astro-charts.com/tools/new/birth-chart/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Astro-Charts birth chart</a>
       </div>
     </div>
   </div>

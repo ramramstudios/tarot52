@@ -395,6 +395,50 @@ body.resizing * {
 }
 .modal-backdrop.is-open .modal { transform: translateY(0); }
 
+.modal-header {
+  position: relative;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.4rem;
+}
+.modal-header .modal-title {
+  margin-bottom: 0;
+  padding: 0 2.6rem;
+  text-align: center;
+}
+.modal-icon-btn {
+  position: absolute;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition: color var(--ease), border-color var(--ease), background var(--ease);
+}
+.modal-icon-btn:hover {
+  color: var(--text);
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+}
+.modal-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.modal-icon-btn[hidden] { display: none; }
+.modal-icon-btn-left { left: 0; }
+.modal-icon-btn-right { right: 0; }
+
 .modal-title {
   font-size: 1.15rem;
   font-weight: 700;
@@ -458,6 +502,22 @@ body.resizing * {
 .modal-actions-split .btn-secondary {
   flex: 0 0 auto;
   min-width: 96px;
+}
+.profile-help-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  align-items: stretch;
+}
+.profile-help-view[hidden] { display: none; }
+.profile-help-copy {
+  color: var(--text);
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+.profile-chart-link {
+  text-align: center;
+  text-decoration: none;
 }
 
 .chat-title {

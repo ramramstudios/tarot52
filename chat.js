@@ -919,6 +919,12 @@ function bootChat(rootEl) {
   const modalStart    = rootEl.querySelector('#newChatStartBtn');
   const profileBtn    = rootEl.querySelector('#chatProfileBtn');
   const profileBackdrop = rootEl.querySelector('#profileModalBackdrop');
+  const profileTitle  = rootEl.querySelector('#profileModalTitle');
+  const profileDesc   = rootEl.querySelector('#profileModalDesc');
+  const profileSelectorView = rootEl.querySelector('#profileSelectorView');
+  const profileHelpView = rootEl.querySelector('#profileHelpView');
+  const profileHelp   = rootEl.querySelector('#profileHelpBtn');
+  const profileHelpBack = rootEl.querySelector('#profileHelpBackBtn');
   const profileSun    = rootEl.querySelector('#profileSunSelect');
   const profileMoon   = rootEl.querySelector('#profileMoonSelect');
   const profileRising = rootEl.querySelector('#profileRisingSelect');
@@ -977,6 +983,24 @@ function bootChat(rootEl) {
     if (profileRising) profileRising.value = profile.rising || '';
   };
 
+  const setProfileModalView = (view, { focus = false } = {}) => {
+    const isHelp = view === 'help';
+    if (profileTitle) profileTitle.textContent = isHelp ? 'Find your birth chart' : 'Birth chart profile';
+    if (profileDesc) {
+      profileDesc.textContent = isHelp
+        ? 'Use a birth chart calculator to find your sun, moon, and rising signs, then come back to add them here.'
+        : 'Optionally add your sun, moon, and rising signs. They can inform readings when they are relevant.';
+    }
+    if (profileSelectorView) profileSelectorView.hidden = isHelp;
+    if (profileHelpView) profileHelpView.hidden = !isHelp;
+    if (profileHelp) profileHelp.hidden = isHelp;
+    if (profileHelpBack) profileHelpBack.hidden = !isHelp;
+    if (focus) {
+      const target = isHelp ? profileHelpBack : profileSun;
+      if (target && typeof target.focus === 'function') target.focus();
+    }
+  };
+
   const configureModalFor = (purpose) => {
     if (!modalTitle || !modalDesc || !modalStart) return;
     if (purpose === 'welcome') {
@@ -1024,6 +1048,7 @@ function bootChat(rootEl) {
     if (!profileBackdrop) return;
     populateProfileOptions();
     syncProfileSelects();
+    setProfileModalView('selector');
     lastFocusedBeforeProfile = document.activeElement;
     profileBackdrop.hidden = false;
     requestAnimationFrame(() => {
@@ -1036,6 +1061,7 @@ function bootChat(rootEl) {
     if (!profileBackdrop) return;
     profileBackdrop.classList.remove('is-open');
     profileBackdrop.hidden = true;
+    setProfileModalView('selector');
     if (lastFocusedBeforeProfile && typeof lastFocusedBeforeProfile.focus === 'function') {
       lastFocusedBeforeProfile.focus();
     }
@@ -1059,6 +1085,8 @@ function bootChat(rootEl) {
 
   if (newBtn) newBtn.addEventListener('click', () => openModal('new'));
   if (profileBtn) profileBtn.addEventListener('click', openProfileModal);
+  if (profileHelp) profileHelp.addEventListener('click', () => setProfileModalView('help', { focus: true }));
+  if (profileHelpBack) profileHelpBack.addEventListener('click', () => setProfileModalView('selector', { focus: true }));
   if (modalBackdrop) {
     modalBackdrop.addEventListener('click', (e) => {
       // Welcome modal cannot be dismissed by clicking the backdrop.
